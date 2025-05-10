@@ -18,12 +18,18 @@ export default function ExerciseCard({ exercise, onPress }: ExerciseCardProps) {
         if (onPress) {
             onPress(exercise);
         } else {
-            router.push({
-                pathname: "/modal",
-                params: { exerciseId: exercise.id }
-            });
+            navigateToModal(exercise.id);
         }
-    };    // Create dynamic styles based on current theme
+    };
+    
+    const navigateToModal = (exerciseId: string, mode = 'details') => {
+        router.push({
+            pathname: "/modal",
+            params: { exerciseId, mode }
+        });
+    };
+
+    // Create dynamic styles based on current theme
     const dynamicStyles = styles(themeColors);
 
     return (
@@ -43,10 +49,7 @@ export default function ExerciseCard({ exercise, onPress }: ExerciseCardProps) {
                 )}
                 <TouchableOpacity
                     style={dynamicStyles.logButton}
-                    onPress={() => router.push({
-                        pathname: "/modal",
-                        params: { exerciseId: exercise.id, mode: 'log' }
-                    })}
+                    onPress={() => navigateToModal(exercise.id, 'log')}
                 >
                     <Text style={dynamicStyles.logButtonText}>Log Workout</Text>
                 </TouchableOpacity>
