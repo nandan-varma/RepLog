@@ -100,12 +100,27 @@ function RootLayoutNav() {
   return (
     <ThemeProvider>
       <NavigationThemeProvider value={colorScheme === 'dark' ? CustomDarkTheme : CustomLightTheme}>
-        <Stack>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colorScheme === 'dark' ? Colors.dark.background : Colors.light.background },
+            animation: 'fade',
+            animationDuration: 200,
+          }}
+        >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ 
-            presentation: 'modal',
-            title: 'Log Workout'
-          }} />
+          <Stack.Screen 
+            name="modal" 
+            options={{ 
+              presentation: 'modal',
+              title: 'Log Workout',
+              animation: 'slide_from_bottom',
+              animationDuration: 250,
+              contentStyle: {
+                backgroundColor: colorScheme === 'dark' ? Colors.dark.background : Colors.light.background,
+              }
+            }} 
+          />
         </Stack>
       </NavigationThemeProvider>
     </ThemeProvider>

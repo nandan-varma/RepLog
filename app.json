@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "RepLog - Workout Logger",
-    "slug": "RepLog",
+    "slug": "replog",
     "version": "1.0.0",
     "description": "A minimal workout logging app using Free Exercise DB",
     "orientation": "portrait",
@@ -36,6 +36,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "09e02b6a-afbc-49db-8ccb-78b253cc3d96"
+      }
+    },
+    "owner": "nandanvarma"
   }
 }
