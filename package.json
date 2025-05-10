@@ -3,7 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "description": "A minimal workout logging app using the Free Exercise DB",
-  "author": "Your Name",
+  "author": "Nandan Varma",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
