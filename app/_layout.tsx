@@ -106,6 +106,9 @@ function RootLayoutNav() {
             contentStyle: { backgroundColor: colorScheme === 'dark' ? Colors.dark.background : Colors.light.background },
             animation: 'fade',
             animationDuration: 200,
+            gestureEnabled: true,
+            gestureDirection: 'horizontal',
+            animationTypeForReplace: 'push',
           }}
         >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -118,7 +121,9 @@ function RootLayoutNav() {
               animationDuration: 250,
               contentStyle: {
                 backgroundColor: colorScheme === 'dark' ? Colors.dark.background : Colors.light.background,
-              }
+              },
+              gestureEnabled: true,
+              gestureDirection: 'vertical',
             }} 
           />
         </Stack>

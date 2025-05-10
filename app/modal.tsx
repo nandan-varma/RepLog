@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { 
   Platform, 
@@ -16,22 +16,30 @@ import {
   Easing,
   Pressable,
   SafeAreaView,
-  useColorScheme
+  useColorScheme,
+  BackHandler
 } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams, router, useNavigation, useRootNavigation } from 'expo-router';
 import { Text, View } from '@/components/Themed';
 import { getExerciseImageUrl, getExerciseById } from '@/services/exerciseService';
 import { addWorkoutLog } from '@/services/workoutService';
 import type { Exercise } from '@/services/exerciseService';
 import theme from '@/constants/theme';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function LogWorkoutModal() {
   const colorScheme = useColorScheme() ?? 'light';
   const themeColors = theme[colorScheme];
+  const navigation = useNavigation();
+  const rootNavigation = useRootNavigation();
   
   const params = useLocalSearchParams();
   const exerciseId = params.exerciseId as string;
   const mode = params.mode as string;
+  
+  // Smooth transition animation refs
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
   
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);
@@ -151,6 +159,65 @@ export default function LogWorkoutModal() {
     });
   };
 
+  // Handle smooth entrance animation
+  useEffect(() => {
+    // Run entrance animations
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true,
+        easing: Easing.out(Easing.ease)
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+        easing: Easing.out(Easing.ease)
+      })
+    ]).start();
+    
+    // Clean up animations when component unmounts
+    return () => {
+      fadeAnim.setValue(0);
+      slideAnim.setValue(50);
+    };
+  }, []);
+
+  // Handle back button properly to avoid white flash
+  useFocusEffect(
+    useCallback(() => {
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        handleGoBack();
+        return true; // Prevent default behavior
+      });
+
+      return () => backHandler.remove();
+    }, [])
+  );
+
+  // Smooth exit transition
+  const handleGoBack = () => {
+    // Run exit animations
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.ease)
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 50,
+        duration: 200,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.ease)
+      })
+    ]).start(() => {
+      // Navigate back after animation completes
+      router.back();
+    });
+  };
+  
   const handleSave = async () => {
     if (!exercise || !sets || !reps) {
       Alert.alert('Required Fields', 'Please fill in sets and reps');
@@ -174,10 +241,11 @@ export default function LogWorkoutModal() {
       const result = await addWorkoutLog(workout);
       
       if (result) {
+        // Show success message then navigate back with animation
         Alert.alert(
           'Success',
           'Workout logged successfully',
-          [{ text: 'OK', onPress: () => router.back() }]
+          [{ text: 'OK', onPress: () => handleGoBack() }]
         );
       } else {
         Alert.alert('Error', 'Failed to log workout');
@@ -207,258 +275,267 @@ export default function LogWorkoutModal() {
     );
   }
 
+  // Wrap the entire content in Animated.View for smooth transitions
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColors.background }]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={[styles.container, { backgroundColor: themeColors.background }]}
+      <Animated.View
+        style={{
+          flex: 1,
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }]
+        }}
       >
-        {/* Header with back button */}
-        <View style={[styles.header, { 
-          backgroundColor: themeColors.background,
-          borderBottomColor: themeColors.border
-        }]}>
-          <TouchableOpacity 
-            style={[styles.backButton, { backgroundColor: themeColors.accent }]}
-            onPress={() => router.back()}
-            accessibilityLabel="Go back"
-          >
-            <Text style={[styles.backButtonText, { color: themeColors.accentForeground }]}>←</Text>
-          </TouchableOpacity>
-          <View style={styles.headerTextContainer}>
-            <Text style={[styles.title, { color: themeColors.foreground }]}>{exercise.name}</Text>
-          </View>
-        </View>
-
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent} 
-          bounces={false} 
-          showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={[styles.container, { backgroundColor: themeColors.background }]}
         >
-          {/* Badge row */}
-          <View style={styles.badgesRow}>
-            <View style={[styles.badge, { backgroundColor: themeColors.accent }]}>
-              <Text style={[styles.badgeText, { color: themeColors.accentForeground }]}>{exercise.level}</Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: themeColors.accent }]}>
-              <Text style={[styles.badgeText, { color: themeColors.accentForeground }]}>{exercise.category}</Text>
-            </View>
-            {exercise.equipment && (
-              <View style={[styles.badge, { backgroundColor: themeColors.accent }]}>
-                <Text style={[styles.badgeText, { color: themeColors.accentForeground }]}>{exercise.equipment}</Text>
-              </View>
-            )}
-            {exercise.mechanic && (
-              <View style={[styles.badge, { backgroundColor: themeColors.accent }]}>
-                <Text style={[styles.badgeText, { color: themeColors.accentForeground }]}>{exercise.mechanic}</Text>
-              </View>
-            )}
-          </View>
-          
-          {/* Image Carousel */}
-          <View style={[styles.imageContainer, { backgroundColor: themeColors.muted }]}>
+          {/* Header with back button */}
+          <View style={[styles.header, { 
+            backgroundColor: themeColors.background,
+            borderBottomColor: themeColors.border
+          }]}>
             <TouchableOpacity 
-              activeOpacity={0.9} 
-              onPress={togglePause}
-              style={styles.imageWrapper}
+              style={[styles.backButton, { backgroundColor: themeColors.accent }]}
+              onPress={handleGoBack}
+              accessibilityLabel="Go back"
             >
-              {exercise.images && exercise.images.length > 0 ? (
-                <Animated.Image 
-                  source={{ uri: getExerciseImageUrl(exercise.id, currentImageIndex) }} 
-                  style={[styles.image, { opacity: imageOpacity }]}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={[styles.image, styles.noImageContainer, { backgroundColor: themeColors.muted }]}>
-                  <Text style={[styles.noImageText, { color: themeColors.mutedForeground }]}>No image available</Text>
-                </View>
-              )}
-              
-              {/* Pause/Play button overlay */}
-              {exercise.images && exercise.images.length > 1 && (
-                <View style={styles.pauseButtonContainer}>
-                  <TouchableOpacity 
-                    style={styles.pauseButton}
-                    onPress={togglePause}
-                  >
-                    <Text style={styles.pauseButtonText}>
-                      {isPaused ? "▶" : "⏸"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+              <Text style={[styles.backButtonText, { color: themeColors.accentForeground }]}>←</Text>
             </TouchableOpacity>
-            
-            {/* Image dots indicators */}
-            {exercise.images && exercise.images.length > 1 && (
-              <View style={styles.dotIndicatorContainer}>
-                {exercise.images.map((_, index) => (
-                  <TouchableOpacity 
-                    key={index}
-                    onPress={() => handleManualImageChange(index)}
-                  >
-                    <View
-                      style={[
-                        styles.dot,
-                        { backgroundColor: index === currentImageIndex 
-                          ? themeColors.primary 
-                          : themeColors.muted 
-                        }
-                      ]}
-                    />
-                  </TouchableOpacity>
-                ))}
+            <View style={styles.headerTextContainer}>
+              <Text style={[styles.title, { color: themeColors.foreground }]}>{exercise.name}</Text>
+            </View>
+          </View>
+
+          <ScrollView 
+            contentContainerStyle={styles.scrollContent} 
+            bounces={false} 
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Badge row */}
+            <View style={styles.badgesRow}>
+              <View style={[styles.badge, { backgroundColor: themeColors.accent }]}>
+                <Text style={[styles.badgeText, { color: themeColors.accentForeground }]}>{exercise.level}</Text>
               </View>
-            )}
-          </View>
-          
-          {/* Section Tabs */}
-          <View style={[styles.tabsContainer, { borderColor: themeColors.border }]}>
-            <Pressable
-              style={[
-                styles.tab, 
-                showInstructions && [styles.activeTab, { borderBottomColor: themeColors.primary }]
-              ]}
-              onPress={() => setShowInstructions(true)}
-            >
-              <Text style={[
-                styles.tabText, 
-                { color: themeColors.mutedForeground },
-                showInstructions && [styles.activeTabText, { color: themeColors.primary }]
-              ]}>
-                Instructions
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[
-                styles.tab, 
-                !showInstructions && [styles.activeTab, { borderBottomColor: themeColors.primary }]
-              ]}
-              onPress={() => setShowInstructions(false)}
-            >
-              <Text style={[
-                styles.tabText, 
-                { color: themeColors.mutedForeground },
-                !showInstructions && [styles.activeTabText, { color: themeColors.primary }]
-              ]}>
-                Log Workout
-              </Text>
-            </Pressable>
-          </View>
-          
-          {/* Instructions panel */}
-          {showInstructions ? (
-            <>
-              {/* Muscles targeted */}
-              {(exercise.primaryMuscles && exercise.primaryMuscles.length > 0) && (
-                <View style={styles.musclesContainer}>
-                  <Text style={styles.sectionTitle}>Muscles Targeted</Text>
-                  <View style={styles.muscleTagsContainer}>
-                    {exercise.primaryMuscles.map((muscle, index) => (
-                      <View key={index} style={styles.muscleTag}>
-                        <Text style={styles.muscleTagText}>{muscle}</Text>
-                      </View>
-                    ))}
-                  </View>
-                  
-                  {exercise.secondaryMuscles && exercise.secondaryMuscles.length > 0 && (
-                    <>
-                      <Text style={styles.secondaryMusclesTitle}>Secondary Muscles</Text>
-                      <View style={styles.muscleTagsContainer}>
-                        {exercise.secondaryMuscles.map((muscle, index) => (
-                          <View key={index} style={[styles.muscleTag, styles.secondaryMuscleTag]}>
-                            <Text style={styles.muscleTagText}>{muscle}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    </>
-                  )}
+              <View style={[styles.badge, { backgroundColor: themeColors.accent }]}>
+                <Text style={[styles.badgeText, { color: themeColors.accentForeground }]}>{exercise.category}</Text>
+              </View>
+              {exercise.equipment && (
+                <View style={[styles.badge, { backgroundColor: themeColors.accent }]}>
+                  <Text style={[styles.badgeText, { color: themeColors.accentForeground }]}>{exercise.equipment}</Text>
                 </View>
               )}
-
-              {exercise.instructions && exercise.instructions.length > 0 && (
-                <View style={styles.instructionsContainer}>
-                  <Text style={styles.sectionTitle}>How To Perform</Text>
-                  {exercise.instructions.map((instruction, index) => (
-                    <View key={index} style={styles.instructionItem}>
-                      <Text style={styles.instructionNumber}>{index + 1}</Text>
-                      <Text style={styles.instructionText}>{instruction}</Text>
-                    </View>
+              {exercise.mechanic && (
+                <View style={[styles.badge, { backgroundColor: themeColors.accent }]}>
+                  <Text style={[styles.badgeText, { color: themeColors.accentForeground }]}>{exercise.mechanic}</Text>
+                </View>
+              )}
+            </View>
+            
+            {/* Image Carousel */}
+            <View style={[styles.imageContainer, { backgroundColor: themeColors.muted }]}>
+              <TouchableOpacity 
+                activeOpacity={0.9} 
+                onPress={togglePause}
+                style={styles.imageWrapper}
+              >
+                {exercise.images && exercise.images.length > 0 ? (
+                  <Animated.Image 
+                    source={{ uri: getExerciseImageUrl(exercise.id, currentImageIndex) }} 
+                    style={[styles.image, { opacity: imageOpacity }]}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={[styles.image, styles.noImageContainer, { backgroundColor: themeColors.muted }]}>
+                    <Text style={[styles.noImageText, { color: themeColors.mutedForeground }]}>No image available</Text>
+                  </View>
+                )}
+                
+                {/* Pause/Play button overlay */}
+                {exercise.images && exercise.images.length > 1 && (
+                  <View style={styles.pauseButtonContainer}>
+                    <TouchableOpacity 
+                      style={styles.pauseButton}
+                      onPress={togglePause}
+                    >
+                      <Text style={styles.pauseButtonText}>
+                        {isPaused ? "▶" : "⏸"}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </TouchableOpacity>
+              
+              {/* Image dots indicators */}
+              {exercise.images && exercise.images.length > 1 && (
+                <View style={styles.dotIndicatorContainer}>
+                  {exercise.images.map((_, index) => (
+                    <TouchableOpacity 
+                      key={index}
+                      onPress={() => handleManualImageChange(index)}
+                    >
+                      <View
+                        style={[
+                          styles.dot,
+                          { backgroundColor: index === currentImageIndex 
+                            ? themeColors.primary 
+                            : themeColors.muted 
+                          }
+                        ]}
+                      />
+                    </TouchableOpacity>
                   ))}
                 </View>
               )}
-            </>
-          ) : (
-            /* Form Container with shadow */
-            <View style={styles.formCardContainer}>
-              <View style={styles.formContainer}>                
-                <View style={styles.row}>
+            </View>
+            
+            {/* Section Tabs */}
+            <View style={[styles.tabsContainer, { borderColor: themeColors.border }]}>
+              <Pressable
+                style={[
+                  styles.tab, 
+                  showInstructions && [styles.activeTab, { borderBottomColor: themeColors.primary }]
+                ]}
+                onPress={() => setShowInstructions(true)}
+              >
+                <Text style={[
+                  styles.tabText, 
+                  { color: themeColors.mutedForeground },
+                  showInstructions && [styles.activeTabText, { color: themeColors.primary }]
+                ]}>
+                  Instructions
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.tab, 
+                  !showInstructions && [styles.activeTab, { borderBottomColor: themeColors.primary }]
+                ]}
+                onPress={() => setShowInstructions(false)}
+              >
+                <Text style={[
+                  styles.tabText, 
+                  { color: themeColors.mutedForeground },
+                  !showInstructions && [styles.activeTabText, { color: themeColors.primary }]
+                ]}>
+                  Log Workout
+                </Text>
+              </Pressable>
+            </View>
+            
+            {/* Instructions panel */}
+            {showInstructions ? (
+              <>
+                {/* Muscles targeted */}
+                {(exercise.primaryMuscles && exercise.primaryMuscles.length > 0) && (
+                  <View style={styles.musclesContainer}>
+                    <Text style={styles.sectionTitle}>Muscles Targeted</Text>
+                    <View style={styles.muscleTagsContainer}>
+                      {exercise.primaryMuscles.map((muscle, index) => (
+                        <View key={index} style={styles.muscleTag}>
+                          <Text style={styles.muscleTagText}>{muscle}</Text>
+                        </View>
+                      ))}
+                    </View>
+                    
+                    {exercise.secondaryMuscles && exercise.secondaryMuscles.length > 0 && (
+                      <>
+                        <Text style={styles.secondaryMusclesTitle}>Secondary Muscles</Text>
+                        <View style={styles.muscleTagsContainer}>
+                          {exercise.secondaryMuscles.map((muscle, index) => (
+                            <View key={index} style={[styles.muscleTag, styles.secondaryMuscleTag]}>
+                              <Text style={styles.muscleTagText}>{muscle}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      </>
+                    )}
+                  </View>
+                )}
+
+                {exercise.instructions && exercise.instructions.length > 0 && (
+                  <View style={styles.instructionsContainer}>
+                    <Text style={styles.sectionTitle}>How To Perform</Text>
+                    {exercise.instructions.map((instruction, index) => (
+                      <View key={index} style={styles.instructionItem}>
+                        <Text style={styles.instructionNumber}>{index + 1}</Text>
+                        <Text style={styles.instructionText}>{instruction}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </>
+            ) : (
+              /* Form Container with shadow */
+              <View style={styles.formCardContainer}>
+                <View style={styles.formContainer}>                
+                  <View style={styles.row}>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>Sets</Text>
+                      <TextInput
+                        style={styles.input}
+                        value={sets}
+                        onChangeText={setSets}
+                        keyboardType="number-pad"
+                        placeholder="e.g., 3"
+                      />
+                    </View>
+                    
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>Reps</Text>
+                      <TextInput
+                        style={styles.input}
+                        value={reps}
+                        onChangeText={setReps}
+                        keyboardType="number-pad"
+                        placeholder="e.g., 10"
+                      />
+                    </View>
+                  </View>
+                  
                   <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Sets</Text>
+                    <Text style={styles.inputLabel}>Weight (kg/lbs)</Text>
                     <TextInput
                       style={styles.input}
-                      value={sets}
-                      onChangeText={setSets}
-                      keyboardType="number-pad"
-                      placeholder="e.g., 3"
+                      value={weight}
+                      onChangeText={setWeight}
+                      keyboardType="decimal-pad"
+                      placeholder="Optional"
                     />
                   </View>
                   
                   <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Reps</Text>
+                    <Text style={styles.inputLabel}>Notes</Text>
                     <TextInput
-                      style={styles.input}
-                      value={reps}
-                      onChangeText={setReps}
-                      keyboardType="number-pad"
-                      placeholder="e.g., 10"
+                      style={[styles.input, styles.notesInput]}
+                      value={notes}
+                      onChangeText={setNotes}
+                      placeholder="Add your notes here..."
+                      multiline
                     />
                   </View>
+                  
+                  <TouchableOpacity 
+                    style={[
+                      styles.saveButton, 
+                      { backgroundColor: themeColors.primary },
+                      saving ? [styles.saveButtonDisabled, { backgroundColor: themeColors.muted }] : null
+                    ]} 
+                    onPress={handleSave}
+                    disabled={saving}
+                  >
+                    <Text style={[styles.saveButtonText, { color: themeColors.primaryForeground }]}>
+                      {saving ? 'Saving...' : 'Save Workout'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-                
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Weight (kg/lbs)</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={weight}
-                    onChangeText={setWeight}
-                    keyboardType="decimal-pad"
-                    placeholder="Optional"
-                  />
-                </View>
-                
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Notes</Text>
-                  <TextInput
-                    style={[styles.input, styles.notesInput]}
-                    value={notes}
-                    onChangeText={setNotes}
-                    placeholder="Add your notes here..."
-                    multiline
-                  />
-                </View>
-                
-                <TouchableOpacity 
-                  style={[
-                    styles.saveButton, 
-                    { backgroundColor: themeColors.primary },
-                    saving ? [styles.saveButtonDisabled, { backgroundColor: themeColors.muted }] : null
-                  ]} 
-                  onPress={handleSave}
-                  disabled={saving}
-                >
-                  <Text style={[styles.saveButtonText, { color: themeColors.primaryForeground }]}>
-                    {saving ? 'Saving...' : 'Save Workout'}
-                  </Text>
-                </TouchableOpacity>
               </View>
-            </View>
-          )}
-        </ScrollView>
+            )}
+          </ScrollView>
 
-        {/* Use a light status bar on iOS to account for the black space above the modal */}
-        <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
-      </KeyboardAvoidingView>
+          {/* Use a light status bar on iOS to account for the black space above the modal */}
+          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        </KeyboardAvoidingView>
+      </Animated.View>
     </SafeAreaView>
   );
 }
