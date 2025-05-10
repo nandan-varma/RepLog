@@ -1,19 +1,18 @@
-const tintColorLight = '#2f95dc';
-const tintColorDark = '#fff';
+/**
+ * Colors.ts - Legacy color system adapter
+ * This file imports from theme.ts and maintains backwards compatibility
+ * with existing components that use the Colors object.
+ */
+import theme, { ColorMode, ThemeColors } from './theme';
 
+// Export theme as default for backward compatibility
 export default {
-  light: {
-    text: '#000',
-    background: '#fff',
-    tint: tintColorLight,
-    tabIconDefault: '#ccc',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#fff',
-    background: '#000',
-    tint: tintColorDark,
-    tabIconDefault: '#ccc',
-    tabIconSelected: tintColorDark,
-  },
+  light: theme.light,
+  dark: theme.dark
 };
+
+// Export theme types for better TypeScript support
+export type { ColorMode, ThemeColors };
+
+// Re-export theme for direct access
+export { getThemeColor } from './theme';

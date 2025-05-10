@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1746829393517,
+      "tag": "0000_open_living_tribunal",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1746832324476,
+      "tag": "0001_useful_cassandra_nova",
+      "breakpoints": true
+    }
+  ]
+}
