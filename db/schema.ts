@@ -1,4 +1,4 @@
-import { integer, text, real, sqliteTable, index, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { integer, text, real, sqliteTable, index, uniqueIndex, primaryKey } from "drizzle-orm/sqlite-core";
 
 // Exercise details from Free Exercise DB
 export const exercises = sqliteTable("exercises", {
@@ -37,9 +37,20 @@ export const workouts = sqliteTable(
         duration: integer("duration"), // in seconds
         notes: text("notes"),
         createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP")
-    },
-    (table) => [
+    },    (table) => [
         index("idx_workouts_date").on(table.date),
         index("idx_workouts_exercise_id").on(table.exerciseId)
     ]
+);
+
+// User bookmarks for exercises
+export const bookmarks = sqliteTable(
+    "bookmarks",
+    {
+        exerciseId: text("exercise_id").references(() => exercises.id, { onDelete: "cascade" }).notNull(),
+        createdAt: text("created_at").notNull(),
+    },
+    (table) => ({
+        pk: primaryKey({ columns: [table.exerciseId] }),
+    })
 );

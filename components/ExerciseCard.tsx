@@ -1,141 +1,156 @@
-import React from 'react';
-import { StyleSheet, Image, View as RNView, Pressable, TouchableOpacity, useColorScheme } from 'react-native';
-import { Text, View } from '@/components/Themed';
-import { Exercise, getExerciseImageUrl } from '@/services/exerciseService';
-import { router } from 'expo-router';
-import theme from '@/constants/theme';
+"use client"
+
+import { useState } from "react"
+import { Image, TouchableOpacity, View, Text } from "react-native"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Bookmark, Info } from "lucide-react-native"
+import { type Exercise } from "@/services/exerciseService"
+import { bookmarkService } from "@/services/bookmarkService"
 
 interface ExerciseCardProps {
-    exercise: Exercise;
-    onPress?: (exercise: Exercise) => void;
+  exercise: Exercise
+  showBookmarkButton?: boolean
 }
 
-export default function ExerciseCard({ exercise, onPress }: ExerciseCardProps) {
-    const colorScheme = useColorScheme() ?? 'light';
-    const themeColors = theme[colorScheme];
-    
-    const handlePress = () => {
-        if (onPress) {
-            onPress(exercise);
-        } else {
-            navigateToModal(exercise.id);
-        }
+export function ExerciseCard({ exercise, showBookmarkButton = true }: ExerciseCardProps) {
+  const [isBookmarked, setIsBookmarked] = useState(false)
+  
+  // Check if the exercise is bookmarked when the component mounts
+  useState(() => {
+    const checkBookmarkStatus = async () => {
+      try {
+        const bookmarked = await bookmarkService.isBookmarked(exercise.id);
+        setIsBookmarked(bookmarked);
+      } catch (error) {
+        console.error("Failed to check bookmark status:", error);
+      }
     };
     
-    const navigateToModal = (exerciseId: string, mode = 'details') => {
-        router.push({
-            pathname: "/modal",
-            params: { exerciseId, mode }
-        });
-    };
+    checkBookmarkStatus();
+  });
 
-    // Create dynamic styles based on current theme
-    const dynamicStyles = styles(themeColors);
+  const toggleBookmark = async () => {
+    try {
+      const newStatus = await bookmarkService.toggleBookmark(exercise.id);
+      setIsBookmarked(newStatus);
+    } catch (error) {
+      console.error("Failed to toggle bookmark:", error);
+    }
+  }
 
-    return (
-        <Pressable
-            style={dynamicStyles.card}
-            onPress={handlePress}
-        >
-            <RNView style={dynamicStyles.imageContainer}>
-                {exercise.images && exercise.images.length > 0 ? (
-                    <Image
-                        source={{ uri: getExerciseImageUrl(exercise.id, 0) }}
-                        style={dynamicStyles.image}
-                        resizeMode="cover"
-                    />
-                ) : (
-                    <RNView style={dynamicStyles.placeholderImage} />
-                )}
-                <TouchableOpacity
-                    style={dynamicStyles.logButton}
-                    onPress={() => navigateToModal(exercise.id, 'log')}
-                >
-                    <Text style={dynamicStyles.logButtonText}>Log Workout</Text>
-                </TouchableOpacity>
-            </RNView>
-            <RNView style={dynamicStyles.content}>
-                <Text style={dynamicStyles.title}>{exercise.name}</Text>
-                <RNView style={dynamicStyles.metaContainer}>
-                    <Text style={dynamicStyles.level}>{exercise.level}</Text>
-                    {exercise.equipment ? (
-                        <Text style={dynamicStyles.equipment}>• {exercise.equipment}</Text>
-                    ) : null}
-                </RNView>
-                <Text style={dynamicStyles.muscles}>
-                    {exercise.primaryMuscles.join(', ')}
-                </Text>
-            </RNView>
-        </Pressable>
-    );
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Card className="overflow-hidden">
+          <View style={{ position: 'relative' }}>
+            <Image
+              source={{ uri: exercise.images[0] || "https://via.placeholder.com/300x150" }}
+              accessibilityLabel={exercise.name}
+              style={{ width: '100%', height: 128, resizeMode: 'cover' }}
+            />
+            {showBookmarkButton && (
+              <TouchableOpacity
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  borderRadius: 20,
+                  padding: 8,
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                }}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  toggleBookmark();
+                }}
+              >
+                <Bookmark 
+                  size={16} 
+                  color={isBookmarked ? "#0891b2" : "#64748b"} 
+                  fill={isBookmarked ? "#0891b2" : "none"} 
+                />
+                <Text style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden' }}>Bookmark</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <CardContent className="p-4">
+            <View className="flex justify-between items-start">
+              <View>
+                <Text className="font-medium">{exercise.name}</Text>
+                <View className="flex items-center gap-2 mt-1">
+                  <Badge variant="outline" className="text-xs capitalize">
+                    <Text>{exercise.level}</Text>
+                  </Badge>
+                  {exercise.equipment && (
+                    <Badge variant="outline" className="text-xs capitalize">
+                      <Text>{exercise.equipment}</Text>
+                    </Badge>
+                  )}
+                </View>
+              </View>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Info className="h-4 w-4" />
+                <Text className="sr-only">Details</Text>
+              </Button>
+            </View>
+          </CardContent>
+        </Card>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{exercise.name}</DialogTitle>
+        </DialogHeader>
+        <View className="space-y-4">
+          <Image
+            source={{ uri: exercise.images[0] || "https://via.placeholder.com/300x150" }}
+            accessibilityLabel={exercise.name}
+            style={{ width: '100%', height: 192, resizeMode: 'cover' }}
+            className="rounded-md"
+          />
+
+          <View className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="capitalize">
+              <Text>{exercise.level}</Text>
+            </Badge>
+            {exercise.equipment && (
+              <Badge variant="outline" className="capitalize">
+                <Text>{exercise.equipment}</Text>
+              </Badge>
+            )}
+            <Badge variant="outline" className="capitalize">
+              <Text>{exercise.category}</Text>
+            </Badge>
+          </View>
+
+          <View>
+            <Text className="text-sm font-medium mb-1">Primary Muscles</Text>
+            <View className="flex flex-wrap gap-1">
+              {exercise.primaryMuscles.map((muscle) => (
+                <Badge key={muscle} variant="secondary" className="capitalize">
+                  <Text>{muscle}</Text>
+                </Badge>
+              ))}
+            </View>
+          </View>
+
+          <View className="flex justify-between pt-2">
+            <Button variant="outline">
+              <Text>View Details</Text>
+            </Button>
+            <Button
+              onPress={(e) => {
+                e.stopPropagation();
+                toggleBookmark();
+              }}
+            >
+              <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? "fill-current" : ""}`} />
+              <Text>{isBookmarked ? "Bookmarked" : "Bookmark"}</Text>
+            </Button>
+          </View>
+        </View>
+      </DialogContent>
+    </Dialog>
+  )
 }
-
-const styles = (themeColors: any) => StyleSheet.create({
-    card: {
-        borderRadius: 8,
-        marginHorizontal: 16,
-        marginBottom: 16,
-        overflow: 'hidden',
-        backgroundColor: themeColors.card,
-        shadowColor: themeColors.background,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    logButton: {
-        position: 'absolute',
-        right: 10,
-        bottom: 10,
-        backgroundColor: themeColors.primary,
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: theme.radius,
-    },
-    logButtonText: {
-        color: themeColors.primaryForeground,
-        fontWeight: 'bold',
-    },
-    imageContainer: {
-        height: 160,
-        width: '100%',
-        backgroundColor: themeColors.muted,
-    }, 
-    image: {
-        width: '100%',
-        height: '100%',
-    },
-    placeholderImage: {
-        width: '100%',
-        height: '100%',
-        backgroundColor: themeColors.muted,
-    },
-    content: {
-        padding: 16,
-        backgroundColor: themeColors.card,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 4,
-        color: themeColors.cardForeground,
-    },
-    metaContainer: {
-        flexDirection: 'row',
-        marginBottom: 4,
-    },
-    level: {
-        textTransform: 'capitalize',
-        marginRight: 8,
-        fontSize: 14,
-        color: themeColors.cardForeground,
-    },
-    equipment: {
-        fontSize: 14,
-        color: themeColors.cardForeground,
-    },
-    muscles: {
-        fontSize: 14,
-        color: themeColors.cardForeground,
-    },
-});

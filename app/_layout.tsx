@@ -1,38 +1,62 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
+// --- Expo and React Native Core ---
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import * as React from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/components/useColorScheme';
-import { ThemeProvider } from '@/components/ThemeProvider';
+// --- UI Components and Icons ---
+import "@/assets/styles/global.css";
+import { View } from 'react-native';
+import { PortalHost } from '@rn-primitives/portal';
+import { Text } from '@/components/ui/text';
 
+
+// --- Database and Data Management ---
+import * as schema from '@/db/schema';
+import { db } from '@/db/db';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations';
-import { Text, View } from '@/components/Themed';
-import Colors from '@/constants/Colors';
-import theme from '@/constants/theme';
 
-import * as schema from '@/db/schema';
-import { db } from '@/db/db';
+// --- Theming and Styling ---
+import { Theme, ThemeProvider, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { NAV_THEME } from '~/lib/constants';
+import { useColorScheme } from '~/lib/useColorScheme';
+import { FontAwesome } from '@expo/vector-icons';
 
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from 'expo-router';
 
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+const LIGHT_THEME: Theme = {
+  ...DefaultTheme,
+  colors: NAV_THEME.light,
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+const DARK_THEME: Theme = {
+  ...DarkTheme,
+  colors: NAV_THEME.dark,
+};
+
+// Conditionally use different layout effects based on platform
+const useIsomorphicLayoutEffect =
+  Platform.OS === 'web' && typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
+
+// Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  // --- UI State ---
+  const hasMounted = React.useRef(false);
+  const { colorScheme, isDarkColorScheme } = useColorScheme();
+  const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+
+  // --- Database Migrations ---
   const { success, error } = useMigrations(db, migrations);
   if (error) {
     return (
@@ -44,23 +68,40 @@ export default function RootLayout() {
 
   console.log('Migration success:', success);
 
+  // --- Font Loading ---
   const [loaded, FontError] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+  // --- Platform-specific Setup ---
+  useIsomorphicLayoutEffect(() => {
+    if (hasMounted.current) {
+      return;
+    }
+
+    if (Platform.OS === 'web') {
+      // Adds the background color to the html element to prevent white background on overscroll.
+      document.documentElement.classList.add('bg-background');
+    }
+    setIsColorSchemeLoaded(true);
+    hasMounted.current = true;
+  }, []);
+
+  // --- Error Handling ---
   useEffect(() => {
     if (FontError) throw FontError;
   }, [FontError]);
 
+  // --- Splash Screen Management ---
   useEffect(() => {
     if (success && loaded) {
       SplashScreen.hideAsync();
     }
   }, [success, loaded]);
 
-  if (!loaded) {
+  // --- Loading States ---
+  if (!isColorSchemeLoaded || !loaded) {
     return null;
   }
 
@@ -68,66 +109,29 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  const { colorScheme, isDarkColorScheme } = useColorScheme();
+
+  // --- Database Queries ---
   const { data } = useLiveQuery(db.select().from(schema.workouts));
   console.log('Data:', data);
 
-  // Create custom theme based on our color scheme
-  const CustomLightTheme = {
-    ...DefaultTheme,
-    colors: {
-      ...DefaultTheme.colors,
-      primary: Colors.light.primary,
-      background: Colors.light.background,
-      card: Colors.light.card,
-      text: Colors.light.text,
-      border: Colors.light.border,
-    },
-  };
-
-  const CustomDarkTheme = {
-    ...DarkTheme,
-    colors: {
-      ...DarkTheme.colors,
-      primary: Colors.dark.primary,
-      background: Colors.dark.background,
-      card: Colors.dark.card,
-      text: Colors.dark.text,
-      border: Colors.dark.border,
-    },
-  };
-
   return (
-    <ThemeProvider>
-      <NavigationThemeProvider value={colorScheme === 'dark' ? CustomDarkTheme : CustomLightTheme}>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colorScheme === 'dark' ? Colors.dark.background : Colors.light.background },
-            animation: 'fade',
-            animationDuration: 200,
-            gestureEnabled: true,
-            gestureDirection: 'horizontal',
-            animationTypeForReplace: 'push',
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen 
-            name="modal" 
-            options={{ 
-              presentation: 'modal',
-              title: 'Log Workout',
-              animation: 'slide_from_bottom',
-              animationDuration: 250,
-              contentStyle: {
-                backgroundColor: colorScheme === 'dark' ? Colors.dark.background : Colors.light.background,
-              },
-              gestureEnabled: true,
-              gestureDirection: 'vertical',
-            }} 
-          />
-        </Stack>
-      </NavigationThemeProvider>
+    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+      <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: 'transparent' },
+          animation: 'fade',
+          animationDuration: 200,
+          gestureEnabled: true,
+          gestureDirection: 'horizontal',
+          animationTypeForReplace: 'push',
+        }}
+      >
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+      <PortalHost />
     </ThemeProvider>
   );
 }

@@ -15,6 +15,13 @@
       "when": 1746832324476,
       "tag": "0001_useful_cassandra_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1746903909943,
+      "tag": "0002_outgoing_mole_man",
+      "breakpoints": true
     }
   ]
 }

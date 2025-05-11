@@ -1,150 +1,60 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, FlatList, ActivityIndicator, TextInput, View as RNView, RefreshControl } from 'react-native';
-import { Text, View } from '@/components/Themed';
-import ExerciseCard from '@/components/ExerciseCard';
-import { fetchExercises, Exercise, saveExercisesToDb, searchExercises } from '@/services/exerciseService';
-import { useNavigation } from '@react-navigation/native';
-import theme from '@/constants/theme';
+import React, { useMemo } from "react";
+import { View, TouchableOpacity, Image } from "react-native";
+import { Text } from "@/components/ui/text";
+import { InfiniteScroll } from "@/components/InfiniteScroll";
+import { type Exercise, type ExerciseCategory } from "@/services/exerciseService";
 
-export default function ExerciseList() {
-  const navigation = useNavigation();
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
-
-  const loadExercises = async () => {
-    setLoading(true);
-    try {
-      const fetchedExercises = await fetchExercises();
-      if (fetchedExercises.length > 0) {
-        await saveExercisesToDb(fetchedExercises);
-        setExercises(fetchedExercises);
-      } else {
-        await loadLocalExercises();
-      }
-    } catch (error) {
-      console.error('Error loading exercises:', error);
-      await loadLocalExercises();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadLocalExercises = async () => {
-    try {
-      const localExercises = await searchExercises('');
-      setExercises(localExercises);
-    } catch (error) {
-      console.error('Error loading local exercises:', error);
-    }
-  };
-
-  const searchForExercises = useCallback(async (query: string) => {
-    try {
-      const results = await searchExercises(query);
-      setExercises(results);
-    } catch (error) {
-      console.error('Error searching exercises:', error);
-    }
-  }, []);
-
-  // Load exercises on initial render
-  useEffect(() => {
-    loadExercises();
-  }, []);
-
-  // Handle search
-  useEffect(() => {
-    const delaySearch = setTimeout(() => {
-      if (searchQuery) {
-        searchForExercises(searchQuery);
-      } else {
-        loadLocalExercises();
-      }
-    }, 300);
-
-    return () => clearTimeout(delaySearch);
-  }, [searchQuery, searchForExercises]);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadExercises();
-    setRefreshing(false);
-  };  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color={theme.light.primary} />
-        <Text style={styles.loadingText}>Loading exercises...</Text>
-      </View>
-    );
-  }
-  return (
-    <View style={styles.container}>
-      <RNView style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search exercises..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholderTextColor="#888"
-        />
-      </RNView>
-
-      <FlatList
-        data={exercises}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ExerciseCard exercise={item} />}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              {searchQuery ? 'No exercises found matching your search.' : 'No exercises found. Pull to refresh.'}
-            </Text>
-          </View>
-        }
-      />
-    </View>
-  );
+interface ExerciseListProps {
+  exercises: Exercise[];
+  searchQuery: string;
+  category: ExerciseCategory | 'all';
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-  },  searchContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.light.border,
-  },
-  searchInput: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: theme.light.border,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    backgroundColor: theme.light.background,
-  },
-  listContent: {
-    padding: 16,
-  },  emptyContainer: {
-    padding: 32,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: theme.light.mutedForeground,
-  },
-});
+export function ExerciseList({ exercises, searchQuery, category }: ExerciseListProps) {
+  const filteredExercises = useMemo(() => {
+    return exercises.filter((exercise) => {
+      const matchesSearch = exercise.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = category === 'all' || exercise.category === category;
+      return matchesSearch && matchesCategory;
+    });
+  }, [exercises, searchQuery, category]);
+
+  const renderExercise = ({ item }: { item: Exercise }) => (
+    <TouchableOpacity 
+      className="flex-row items-center p-3 bg-card rounded-lg mb-2 border border-border"
+    >
+      <Image 
+        source={{ uri: item.images[0] || "/placeholder.svg" }}
+        className="w-16 h-16 rounded mr-3 bg-muted"
+      />
+      <View className="flex-1">
+        <Text className="font-medium">{item.name}</Text>
+        <Text className="text-muted-foreground text-sm capitalize">{item.equipment}</Text>
+        <Text className="text-muted-foreground text-xs">{item.primaryMuscles.join(', ')}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const EmptyListComponent = () => (
+    <View className="py-8 items-center">
+      <Text className="text-muted-foreground">No exercises found</Text>
+    </View>
+  );
+
+  // Generate a unique key for each exercise using both id and name
+  const generateUniqueKey = (item: Exercise, index: number) => {
+    // Use a combination of index and id to ensure uniqueness
+    return `exercise-${index}-${item.id}`;
+  };
+
+  return (
+    <InfiniteScroll
+      data={filteredExercises}
+      renderItem={renderExercise}
+      keyExtractor={generateUniqueKey}
+      initialNumToRender={10}
+      pageSize={10}
+      listEmptyComponent={<EmptyListComponent />}
+    />
+  );
+}
