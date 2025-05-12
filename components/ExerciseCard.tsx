@@ -1,14 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { Image, TouchableOpacity, View, Text } from "react-native"
+import { useState, useEffect } from "react"
+import { Image, View } from "react-native"
+import { Text } from "@/components/ui/text"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Bookmark, Info } from "lucide-react-native"
+import { Info } from "lucide-react-native"
 import { type Exercise } from "@/services/exerciseService"
+import { BookmarkButton } from "@/components/BookmarkButton"
 import { bookmarkService } from "@/services/bookmarkService"
+import { bookmarkEvents } from "@/services/bookmarkEvents"
 
 interface ExerciseCardProps {
   exercise: Exercise
@@ -17,28 +20,40 @@ interface ExerciseCardProps {
 
 export function ExerciseCard({ exercise, showBookmarkButton = true }: ExerciseCardProps) {
   const [isBookmarked, setIsBookmarked] = useState(false)
-  
-  // Check if the exercise is bookmarked when the component mounts
-  useState(() => {
-    const checkBookmarkStatus = async () => {
-      try {
-        const bookmarked = await bookmarkService.isBookmarked(exercise.id);
-        setIsBookmarked(bookmarked);
-      } catch (error) {
-        console.error("Failed to check bookmark status:", error);
-      }
-    };
+    // Check bookmark status when component mounts or when exercise changes
+  useEffect(() => {
+    let isMounted = true
     
-    checkBookmarkStatus();
-  });
-
-  const toggleBookmark = async () => {
-    try {
-      const newStatus = await bookmarkService.toggleBookmark(exercise.id);
-      setIsBookmarked(newStatus);
-    } catch (error) {
-      console.error("Failed to toggle bookmark:", error);
+    const checkBookmarkStatus = async () => {
+      if (exercise?.id) {
+        try {
+          const status = await bookmarkService.isBookmarked(exercise.id)
+          if (isMounted) {
+            setIsBookmarked(status)
+          }
+        } catch (error) {
+          console.error("Failed to check bookmark status:", error)
+        }
+      }
     }
+    
+    checkBookmarkStatus()
+    
+    // Subscribe to bookmark events
+    const unsubscribe = bookmarkEvents.subscribe((id, bookmarked) => {
+      if (id === exercise?.id && isMounted) {
+        setIsBookmarked(bookmarked)
+      }
+    })
+    
+    return () => { 
+      isMounted = false 
+      unsubscribe()
+    }
+  }, [exercise?.id])
+  
+  const handleBookmarkChange = (status: boolean) => {
+    setIsBookmarked(status)
   }
 
   return (
@@ -50,29 +65,19 @@ export function ExerciseCard({ exercise, showBookmarkButton = true }: ExerciseCa
               source={{ uri: exercise.images[0] || "https://via.placeholder.com/300x150" }}
               accessibilityLabel={exercise.name}
               style={{ width: '100%', height: 128, resizeMode: 'cover' }}
-            />
-            {showBookmarkButton && (
-              <TouchableOpacity
-                style={{
-                  position: 'absolute',
-                  top: 8,
-                  right: 8,
-                  borderRadius: 20,
-                  padding: 8,
-                  backgroundColor: 'rgba(255, 255, 255, 0.8)'
-                }}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  toggleBookmark();
-                }}
-              >
-                <Bookmark 
-                  size={16} 
-                  color={isBookmarked ? "#0891b2" : "#64748b"} 
-                  fill={isBookmarked ? "#0891b2" : "none"} 
+            />            {showBookmarkButton && (
+              <View style={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+              }}>
+                <BookmarkButton 
+                  exerciseId={exercise.id}
+                  variant="icon"
+                  size="sm"
+                  onBookmarkChange={handleBookmarkChange}
                 />
-                <Text style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden' }}>Bookmark</Text>
-              </TouchableOpacity>
+              </View>
             )}
           </View>
           <CardContent className="p-4">
@@ -138,16 +143,11 @@ export function ExerciseCard({ exercise, showBookmarkButton = true }: ExerciseCa
           <View className="flex justify-between pt-2">
             <Button variant="outline">
               <Text>View Details</Text>
-            </Button>
-            <Button
-              onPress={(e) => {
-                e.stopPropagation();
-                toggleBookmark();
-              }}
-            >
-              <Bookmark className={`h-4 w-4 mr-2 ${isBookmarked ? "fill-current" : ""}`} />
-              <Text>{isBookmarked ? "Bookmarked" : "Bookmark"}</Text>
-            </Button>
+            </Button>            <BookmarkButton
+              exerciseId={exercise.id}
+              variant="button"
+              onBookmarkChange={handleBookmarkChange}
+            />
           </View>
         </View>
       </DialogContent>

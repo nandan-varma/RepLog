@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Image } from "react-native";
 import { Text } from "@/components/ui/text";
 import { InfiniteScroll } from "@/components/InfiniteScroll";
 import { type Exercise, type ExerciseCategory } from "@/services/exerciseService";
+import { BookmarkButton } from "@/components/BookmarkButton";
 
 interface ExerciseListProps {
   exercises: Exercise[];
@@ -18,7 +19,6 @@ export function ExerciseList({ exercises, searchQuery, category }: ExerciseListP
       return matchesSearch && matchesCategory;
     });
   }, [exercises, searchQuery, category]);
-
   const renderExercise = ({ item }: { item: Exercise }) => (
     <TouchableOpacity 
       className="flex-row items-center p-3 bg-card rounded-lg mb-2 border border-border"
@@ -32,6 +32,11 @@ export function ExerciseList({ exercises, searchQuery, category }: ExerciseListP
         <Text className="text-muted-foreground text-sm capitalize">{item.equipment}</Text>
         <Text className="text-muted-foreground text-xs">{item.primaryMuscles.join(', ')}</Text>
       </View>
+      <BookmarkButton 
+        exerciseId={item.id} 
+        variant="icon" 
+        size="sm" 
+      />
     </TouchableOpacity>
   );
 
