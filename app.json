@@ -2,7 +2,7 @@
   "expo": {
     "name": "RepLog - Workout Logger",
     "slug": "replog",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "description": "A minimal workout logging app using Free Exercise DB",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -32,7 +32,10 @@
     },
     "plugins": [
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-font",
+      "expo-web-browser",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

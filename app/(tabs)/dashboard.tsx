@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { WorkoutStats } from "@/components/WorkoutStats"
 import { BookmarkedExercises } from "@/components/BookmarkedExercises"
 import { WorkoutHistory } from "@/components/WorkoutHistory"
+import { FitnessGoalDisplay } from "@/components/FitnessGoalDisplay"
 
 export function Dashboard() {
     const [tab, setTab] = useState("bookmarks");
@@ -14,6 +15,7 @@ export function Dashboard() {
     return (
         <View className="p-4 space-y-6 gap-4 mt-16">
             <WorkoutStats />
+            <FitnessGoalDisplay />
             <Tabs
                 value={tab}
                 onValueChange={(value) => setTab(value)}
@@ -32,7 +34,8 @@ export function Dashboard() {
                 <TabsContent value="history" className="mt-4">
                     <WorkoutHistory />
                 </TabsContent>
-            </Tabs>        </View>
+            </Tabs>
+        </View>
     )
 }
 

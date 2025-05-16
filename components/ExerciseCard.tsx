@@ -1,17 +1,15 @@
-"use client"
-
 import { useState, useEffect } from "react"
-import { Image, View } from "react-native"
+import { Image, View, Pressable } from "react-native"
+import { useRouter } from "expo-router"
 import { Text } from "@/components/ui/text"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Info } from "lucide-react-native"
-import { type Exercise } from "@/services/exerciseService"
+import { type Exercise, bookmarkService, bookmarkEvents } from "@/services"
 import { BookmarkButton } from "@/components/BookmarkButton"
-import { bookmarkService } from "@/services/bookmarkService"
-import { bookmarkEvents } from "@/services/bookmarkEvents"
+import { useTransitionContext } from "@/components/TransitionContext"
+import Animated, { FadeIn } from "react-native-reanimated"
 
 interface ExerciseCardProps {
   exercise: Exercise
@@ -19,8 +17,11 @@ interface ExerciseCardProps {
 }
 
 export function ExerciseCard({ exercise, showBookmarkButton = true }: ExerciseCardProps) {
+  const router = useRouter()
   const [isBookmarked, setIsBookmarked] = useState(false)
-    // Check bookmark status when component mounts or when exercise changes
+  const { setSelectedExercise } = useTransitionContext()
+  
+  // Check bookmark status when component mounts or when exercise changes
   useEffect(() => {
     let isMounted = true
     
@@ -54,18 +55,27 @@ export function ExerciseCard({ exercise, showBookmarkButton = true }: ExerciseCa
   
   const handleBookmarkChange = (status: boolean) => {
     setIsBookmarked(status)
-  }
-
+  };
+  
+  const handleExercisePress = (): void => {
+    setSelectedExercise(exercise)
+    router.push({
+      pathname: "/exercise",
+      params: { id: exercise.id }
+    })
+  };
+  
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <Animated.View entering={FadeIn.duration(500)} className="w-full">
+      <Pressable onPress={handleExercisePress}>
         <Card className="overflow-hidden">
           <View style={{ position: 'relative' }}>
             <Image
               source={{ uri: exercise.images[0] || "https://via.placeholder.com/300x150" }}
               accessibilityLabel={exercise.name}
               style={{ width: '100%', height: 128, resizeMode: 'cover' }}
-            />            {showBookmarkButton && (
+            />
+            {showBookmarkButton && (
               <View style={{
                 position: 'absolute',
                 top: 8,
@@ -95,62 +105,22 @@ export function ExerciseCard({ exercise, showBookmarkButton = true }: ExerciseCa
                   )}
                 </View>
               </View>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8"
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleExercisePress();
+                }}
+              >
                 <Info className="h-4 w-4" />
                 <Text className="sr-only">Details</Text>
               </Button>
             </View>
           </CardContent>
         </Card>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{exercise.name}</DialogTitle>
-        </DialogHeader>
-        <View className="space-y-4">
-          <Image
-            source={{ uri: exercise.images[0] || "https://via.placeholder.com/300x150" }}
-            accessibilityLabel={exercise.name}
-            style={{ width: '100%', height: 192, resizeMode: 'cover' }}
-            className="rounded-md"
-          />
-
-          <View className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="capitalize">
-              <Text>{exercise.level}</Text>
-            </Badge>
-            {exercise.equipment && (
-              <Badge variant="outline" className="capitalize">
-                <Text>{exercise.equipment}</Text>
-              </Badge>
-            )}
-            <Badge variant="outline" className="capitalize">
-              <Text>{exercise.category}</Text>
-            </Badge>
-          </View>
-
-          <View>
-            <Text className="text-sm font-medium mb-1">Primary Muscles</Text>
-            <View className="flex flex-wrap gap-1">
-              {exercise.primaryMuscles.map((muscle) => (
-                <Badge key={muscle} variant="secondary" className="capitalize">
-                  <Text>{muscle}</Text>
-                </Badge>
-              ))}
-            </View>
-          </View>
-
-          <View className="flex justify-between pt-2">
-            <Button variant="outline">
-              <Text>View Details</Text>
-            </Button>            <BookmarkButton
-              exerciseId={exercise.id}
-              variant="button"
-              onBookmarkChange={handleBookmarkChange}
-            />
-          </View>
-        </View>
-      </DialogContent>
-    </Dialog>
+      </Pressable>
+    </Animated.View>
   )
 }

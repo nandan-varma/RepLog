@@ -13,6 +13,9 @@ import "@/assets/styles/global.css";
 import { View } from 'react-native';
 import { PortalHost } from '@rn-primitives/portal';
 import { Text } from '@/components/ui/text';
+import { DevelopmentTools } from '@/components/DevelopmentTools';
+import { TransitionProvider } from '@/components/TransitionContext';
+import { OnboardingContainer } from '@/components/OnboardingContainer';
 
 
 // --- Database and Data Management ---
@@ -21,6 +24,7 @@ import { db } from '@/db/db';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations';
+import { initializationService } from '@/services/initializationService';
 
 // --- Theming and Styling ---
 import { Theme, ThemeProvider, DefaultTheme, DarkTheme } from '@react-navigation/native';
@@ -93,11 +97,19 @@ export default function RootLayout() {
     if (FontError) throw FontError;
   }, [FontError]);
 
-  // --- Splash Screen Management ---
+  // --- Splash Screen Management & App Initialization ---
   useEffect(() => {
-    if (success && loaded) {
-      SplashScreen.hideAsync();
-    }
+    const initializeApp = async () => {
+      if (success && loaded) {
+        // Initialize application data
+        await initializationService.initialize();
+
+        // Then hide splash screen
+        await SplashScreen.hideAsync();
+      }
+    };
+
+    initializeApp();
   }, [success, loaded]);
 
   // --- Loading States ---
@@ -118,19 +130,24 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
       <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: 'transparent' },
-          animation: 'fade',
-          animationDuration: 200,
-          gestureEnabled: true,
-          gestureDirection: 'horizontal',
-          animationTypeForReplace: 'push',
-        }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
+      <TransitionProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: 'transparent' },
+            animation: 'fade',
+            animationDuration: 200,
+            gestureEnabled: true,
+            gestureDirection: 'horizontal',
+            animationTypeForReplace: 'push',
+          }}
+        >
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+        <OnboardingContainer />
+        {/* Development tools - only visible in development */}
+        {__DEV__ && <DevelopmentTools />}
+      </TransitionProvider>
       <PortalHost />
     </ThemeProvider>
   );

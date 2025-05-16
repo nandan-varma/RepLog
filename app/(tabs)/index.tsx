@@ -1,19 +1,33 @@
-import { useState, useEffect } from "react";
-import { View } from "react-native";
-import { Search, Filter } from "lucide-react-native";
+import { useState, useEffect, useMemo } from "react";
+import { View, ActivityIndicator } from "react-native";
+import { Search } from "lucide-react-native";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Text } from "@/components/ui/text";
-import { exerciseService, type Exercise, type ExerciseCategory } from "@/services/exerciseService";
+import { exerciseService, type Exercise, type ExerciseCategory, type ExerciseFilters } from "@/services/exerciseService";
 import { ExerciseList } from "@/components/ExerciseList";
+import { FilterSection } from "@/components/FilterSection";
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { useOnboarding } from '@/hooks/useOnboarding';
 
 export function Home() {
     const [searchQuery, setSearchQuery] = useState("");
     const [exercises, setExercises] = useState<Exercise[]>([]);
-    const [selectedTab, setSelectedTab] = useState<ExerciseCategory | 'all'>("all");
     const [isLoading, setIsLoading] = useState(true);
-    
+    const [filters, setFilters] = useState<ExerciseFilters>({
+        query: "",
+        category: undefined,
+        level: undefined,
+        equipment: undefined,
+        muscle: undefined,
+    });
+
+    // Count active filters (excluding search query)
+    const activeFilterCount = useMemo(() => {
+        return Object.entries(filters)
+            .filter(([key, value]) => key !== 'query' && value !== undefined)
+            .length;
+    }, [filters]);
+
     useEffect(() => {
         async function loadExercises() {
             setIsLoading(true);
@@ -23,135 +37,104 @@ export function Home() {
             } catch (error) {
                 console.error("Failed to load exercises:", error);
                 // Fallback to mock data if database fails
-                setExercises(mockExercises as unknown as Exercise[]);
+                setExercises([]);
             } finally {
                 setIsLoading(false);
             }
         }
-        
+
         loadExercises();
     }, []);
+    // Filter exercises based on search query and filters
+    const filteredExercises = useMemo(() => {
+        if (!exercises.length) return [];
 
-    // Mock data for fallback
-    const mockExercises = [
-        {
-            id: "1",
-            name: "Barbell Bench Press",
-            level: "intermediate",
-            equipment: "barbell",
-            primaryMuscles: ["chest"],
-            category: "strength",
-            images: ["/placeholder.svg?height=200&width=300"],
-        },
-        {
-            id: "2",
-            name: "Pull-ups",
-            level: "intermediate",
-            equipment: "body only",
-            primaryMuscles: ["lats"],
-            category: "strength",
-            images: ["/placeholder.svg?height=200&width=300"],
-        },
-        {
-            id: "3",
-            name: "Squats",
-            level: "beginner",
-            equipment: "body only",
-            primaryMuscles: ["quadriceps"],
-            category: "strength",
-            images: ["/placeholder.svg?height=200&width=300"],
-        },
-        {
-            id: "4",
-            name: "Deadlift",
-            level: "intermediate",
-            equipment: "barbell",
-            primaryMuscles: ["lower back"],
-            category: "powerlifting",
-            images: ["/placeholder.svg?height=200&width=300"],
-        },
-        {
-            id: "5",
-            name: "Treadmill Running",
-            level: "beginner",
-            equipment: "machine",
-            primaryMuscles: ["quadriceps"],
-            category: "cardio",
-            images: ["/placeholder.svg?height=200&width=300"],
-        },
-    ]
-    
+        return exercises.filter(exercise => {
+            // Filter by search query
+            if (searchQuery && !exercise.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+                return false;
+            }
+
+            // Filter by category
+            if (filters.category && exercise.category !== filters.category) {
+                return false;
+            }
+
+            // Filter by level
+            if (filters.level && exercise.level !== filters.level) {
+                return false;
+            }
+
+            // Filter by equipment
+            if (filters.equipment && exercise.equipment !== filters.equipment) {
+                return false;
+            }
+
+            // Filter by muscle (if implemented)
+            if (filters.muscle && filters.muscle.length > 0) {
+                const muscleMatches = exercise.primaryMuscles.some(
+                    muscle => muscle.toLowerCase().includes(filters.muscle!.toLowerCase())
+                );
+                if (!muscleMatches) return false;
+            }
+
+            return true;
+        });
+    }, [exercises, searchQuery, filters]);
+
     return (
         <View className="p-4 space-y-6">
-            <View className="relative py-6">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search exercises..."
-                    className="pl-9"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.nativeEvent.text)}
-                />
-            </View>
-
-            <Tabs
-                value={selectedTab}
-                onValueChange={(value) => setSelectedTab(value as ExerciseCategory | 'all')}
-                className="w-full"
-            >
-                <TabsList className="flex-row w-full">
-                    <TabsTrigger value="all" className="flex-1">
-                        <Text>All</Text>
-                    </TabsTrigger>
-                    <TabsTrigger value="strength" className="flex-1">
-                        <Text>Strength</Text>
-                    </TabsTrigger>
-                    <TabsTrigger value="cardio" className="flex-1">
-                        <Text>Cardio</Text>
-                    </TabsTrigger>
-                    <TabsTrigger value="stretching" className="flex-1">
-                        <Text>Stretching</Text>
-                    </TabsTrigger>
-                </TabsList>
-                
-                {isLoading ? (
-                    <View className="mt-4 flex items-center justify-center py-8">
-                        <Text>Loading exercises...</Text>
+            <View className="py-6">
+                <View className="space-y-2">
+                    <View className="relative">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search exercises..."
+                            className="pl-9 pr-3"
+                            value={searchQuery}
+                            onChange={(e) => {
+                                const text = e.nativeEvent.text;
+                                setSearchQuery(text);
+                                setFilters(prev => ({ ...prev, query: text }));
+                            }}
+                        />
                     </View>
-                ) : (
-                    <>
-                        <TabsContent value="all" className="mt-4">
-                            <ExerciseList 
-                                exercises={exercises} 
-                                searchQuery={searchQuery}
-                                category="all"
-                            />
-                        </TabsContent>
-                        <TabsContent value="strength" className="mt-4">
-                            <ExerciseList 
-                                exercises={exercises} 
-                                searchQuery={searchQuery}
-                                category="strength"
-                            />
-                        </TabsContent>
-                        <TabsContent value="cardio" className="mt-4">
-                            <ExerciseList 
-                                exercises={exercises} 
-                                searchQuery={searchQuery}
-                                category="cardio"
-                            />
-                        </TabsContent>
-                        <TabsContent value="stretching" className="mt-4">
-                            <ExerciseList 
-                                exercises={exercises} 
-                                searchQuery={searchQuery}
-                                category="stretching"
-                            />
-                        </TabsContent>
-                    </>
-                )}
-            </Tabs>
+
+                    <FilterSection
+                        filters={filters}
+                        onFiltersChange={setFilters}
+                        activeFilterCount={activeFilterCount}
+                    />
+                </View>
+            </View>            {isLoading ? (
+                <Animated.View
+                    className="mt-4 flex items-center justify-center py-8"
+                    entering={FadeIn.duration(400)}
+                >
+                    <ActivityIndicator size="small" className="mb-2" />
+                    <Text>Loading exercises...</Text>
+                </Animated.View>
+            ) : (
+                <ExerciseList
+                    exercises={filteredExercises}
+                    searchQuery={searchQuery}
+                    category={filters.category || 'all'}
+                />
+            )}
         </View>
     )
 }
 
-export default Home;
+export default function IndexPage() {
+    const { showMainContent } = useOnboarding();
+    
+    // Render home screen with a nice fade-in animation once onboarding is completed
+    return (
+        <Animated.View 
+            className="flex-1"
+            entering={FadeIn.delay(100).duration(500)}
+        >
+            <Home />
+        </Animated.View>
+    );
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FlatList, ActivityIndicator, View } from "react-native";
 import { Text } from "@/components/ui/text";
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 interface InfiniteScrollProps<T> {
   data: T[];
@@ -50,15 +51,17 @@ export function InfiniteScroll<T>({
       setLoading(false);
     }, 300); // Small delay to prevent rapid firing
   };
-
   const renderFooter = () => {
     if (!loading) return null;
     
     return (
-      <View className="py-4 flex-row justify-center">
+      <Animated.View 
+        className="py-4 flex-row justify-center"
+        entering={FadeIn.duration(300)}
+      >
         <ActivityIndicator size="small" />
         <Text className="ml-2">Loading more...</Text>
-      </View>
+      </Animated.View>
     );
   };
 
