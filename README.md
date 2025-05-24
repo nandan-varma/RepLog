@@ -2,6 +2,6 @@
 
 # Demo
 
-<video width="640" height="360" controls>
-  <source src="https://raw.githubusercontent.com/nandan-varma/replog/main/assets/fitness-demo.mp4" type="video/mp4">
-</video>
+
+https://github.com/user-attachments/assets/c944ff30-e190-4408-b1d6-a6ce2d81dbb0
+
