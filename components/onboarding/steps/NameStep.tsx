@@ -33,11 +33,12 @@ export function NameStep({ onComplete, initialValue = '' }: NameStepProps) {
         value={name}
         onChangeText={setName}
         placeholder="Enter your name"
-        autoFocus={Platform.OS !== 'web'}
+        autoFocus={true}
         autoCapitalize="words"
         returnKeyType="done"
         blurOnSubmit={true}
         onSubmitEditing={handleSubmit}
+        selectTextOnFocus={true}
       />
     </OnboardingStep>
   );

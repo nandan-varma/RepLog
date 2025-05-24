@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, ScrollView, ActivityIndicator } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { Text } from "@/components/ui/text";
-import { ExerciseInfo } from "@/components/ExerciseInfo";
+import { ExerciseInfo } from "@/components/excercise/ExerciseInfo";
 import { LogWorkoutForm } from "@/components/LogWorkoutForm";
 import { exerciseService, type Exercise } from "@/services/exerciseService";
 import { useTransitionContext } from "@/components/TransitionContext";

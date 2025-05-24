@@ -44,7 +44,8 @@ export function AgeStep({ onComplete, initialValue }: AgeStepProps) {
         value={age}
         onChangeText={handleChange}
         placeholder="Enter your age"
-        autoFocus={Platform.OS !== 'web'}
+        autoFocus={true}
+        selectTextOnFocus={true}
         keyboardType="number-pad"
         returnKeyType="done"
         blurOnSubmit={true}

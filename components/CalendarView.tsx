@@ -4,7 +4,7 @@ import { Calendar } from 'react-native-calendars';
 import { Text } from './ui/text';
 import { workoutService } from '@/services/workoutService';
 import { Workout } from '@/services/workoutService';
-import WorkoutSummary from './WorkoutSummary';
+import WorkoutSummary from './workout/WorkoutSummary';
 
 type MarkedDates = {
   [date: string]: {

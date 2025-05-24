@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { cn } from '~/lib/utils';
 
 interface AnimatedFitnessIconProps {
@@ -48,11 +48,12 @@ export function AnimatedFitnessIcon({
 
 // Individual icon components
 const DumbbellIcon = ({ color }: { color: string }) => (
-    <View className="flex-row items-center">
-        <View className="w-5 h-5 rounded-full" style={{ backgroundColor: color }} />
-        <View className="w-[30px] h-2 rounded" style={{ backgroundColor: color }} />
-        <View className="w-5 h-5 rounded-full" style={{ backgroundColor: color }} />
-    </View>
+    <Image
+        source={require('@/assets/images/dumbell.png')}
+        style={[styles.dumbbellWeight, { backgroundColor: "transparent" }]}
+        height={150}
+        width={150}
+    />
 );
 
 // Static version of the runner icon to avoid animation issues
@@ -73,19 +74,20 @@ const StaticRunnerIcon = ({ color }: { color: string }) => {
     );
 };
 
-const ScaleIcon = ({ color }: { color: any }) => {
-    const backgroundColor = typeof color === 'string' ? color : '#0891b2';
+const ScaleIcon = ({ color }: { color: string }) => {
+    const backgroundColor = color;
 
     return (
-        <View className="items-center">
-            <View className="w-10 h-[5px] rounded" style={{ backgroundColor }} />
-            <View className="w-[30px] h-5 rounded border-2 my-[5px]" style={{ borderColor: backgroundColor }} />
-            <View className="w-[45px] h-[10px] rounded" style={{ backgroundColor }} />
-        </View>
+        <Image
+            source={require('@/assets/images/weighing-scale.png')}
+            style={[styles.scaleTop, { tintColor: backgroundColor }]}
+            height={150}
+            width={150}
+        />
     );
 };
 
-const HeartIcon = ({ color }: { color: any }) => {
+const HeartIcon = ({ color }: { color: string }) => {
     const backgroundColor = typeof color === 'string' ? color : '#0891b2';
 
     return (

@@ -4,7 +4,7 @@ import { Search } from "lucide-react-native";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { exerciseService, type Exercise, type ExerciseCategory, type ExerciseFilters } from "@/services/exerciseService";
-import { ExerciseList } from "@/components/ExerciseList";
+import { ExerciseList } from "@/components/excercise/ExerciseList";
 import { FilterSection } from "@/components/FilterSection";
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useOnboarding } from '@/hooks/useOnboarding';

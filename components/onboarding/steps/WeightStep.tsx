@@ -42,7 +42,9 @@ export function WeightStep({ onComplete, initialValue }: WeightStepProps) {
           placeholder={`Enter weight in ${unitSystem === 'metric' ? 'kg' : 'lbs'}`}
           className="flex-1 mr-2"
           keyboardType="numeric"
-          autoFocus={Platform.OS !== 'web'}
+          autoFocus={true}
+          returnKeyType="done"
+          selectTextOnFocus={true}
         />
         <Text className="text-lg">{unitSystem === 'metric' ? 'kg' : 'lbs'}</Text>
       </View>

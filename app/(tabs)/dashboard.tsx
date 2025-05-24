@@ -4,9 +4,9 @@ import { useState } from "react"
 import { View } from "react-native"
 import { Text } from "@/components/ui/text"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { WorkoutStats } from "@/components/WorkoutStats"
-import { BookmarkedExercises } from "@/components/BookmarkedExercises"
-import { WorkoutHistory } from "@/components/WorkoutHistory"
+import { WorkoutStats } from "@/components/workout/WorkoutStats"
+import { BookmarkedExercises } from "@/components/excercise/BookmarkedExercises"
+import { WorkoutHistory } from "@/components/workout/WorkoutHistory"
 import { FitnessGoalDisplay } from "@/components/FitnessGoalDisplay"
 
 export function Dashboard() {
