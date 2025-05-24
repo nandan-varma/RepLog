@@ -2,6 +2,6 @@
 
 # Demo
 
-<video width="320" height="240" controls>
-  <source src="https://qujr12qsco.ufs.sh/f/fthLDAMTNUTlJUhuiIdzxiZ8RUlHQfDceV5yaEgCuWMr0Y2P" type="video/mp4"/>
+<video width="640" height="360" controls>
+  <source src="https://raw.githubusercontent.com/nandan-varma/replog/main/assets/fitness-demo.mp4" type="video/mp4">
 </video>
