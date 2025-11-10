@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { usePreferences } from '@/services/preferencesService';
-import { useOnboarding } from '@/hooks/useOnboarding';
+import { useOnboardingContext } from '@/components/OnboardingContext';
 import { OnboardingLayout } from '@/components/onboarding/OnboardingLayout';
 import { WelcomeStep } from '@/components/onboarding/steps/WelcomeStep';
 import { NameStep } from '@/components/onboarding/steps/NameStep';
@@ -65,25 +65,25 @@ export default function OnboardingScreen() {
     }
   };
   
-  const { finishOnboarding } = useOnboarding();
+   const { completeOnboarding } = useOnboardingContext();
   
-  const saveUserData = async () => {
-    // Save all preferences using the service
-    await setName(userData.name);
-    await setAge(userData.age);
-    await setWeight(userData.weight);
-    await setHeight(userData.height);
-    // Ensure fitness goal is correctly typed before saving
-    if (userData.fitnessGoal && ['lose-weight', 'build-muscle', 'improve-fitness'].includes(userData.fitnessGoal)) {
-      await setFitnessGoal(userData.fitnessGoal as FitnessGoalId);
-    }
+   const saveUserData = async () => {
+     // Save all preferences using the service
+     await setName(userData.name);
+     await setAge(userData.age);
+     await setWeight(userData.weight);
+     await setHeight(userData.height);
+     // Ensure fitness goal is correctly typed before saving
+     if (userData.fitnessGoal && ['lose-weight', 'build-muscle', 'improve-fitness'].includes(userData.fitnessGoal)) {
+       await setFitnessGoal(userData.fitnessGoal as FitnessGoalId);
+     }
 
-    // Finish onboarding - this will trigger navigation
-    await finishOnboarding();
-    
-    // Navigate to main app
-    router.replace('/(tabs)');
-  };
+     // Complete onboarding
+     await completeOnboarding();
+
+     // Navigate to main app
+     router.replace('/');
+   };
 
   const handleBack = () => {
     if (step > 0) {

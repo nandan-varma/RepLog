@@ -15,13 +15,11 @@ import { PortalHost } from '@rn-primitives/portal';
 import { Text } from '@/components/ui/text';
 
 import { TransitionProvider } from '@/components/TransitionContext';
-import { OnboardingContainer } from '@/components/OnboardingContainer';
+import { OnboardingProvider } from '@/components/OnboardingContext';
 
 
 // --- Database and Data Management ---
-import * as schema from '@/db/schema';
 import { db } from '@/db/db';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations';
 import { initializationService } from '@/services/initializationService';
@@ -57,8 +55,9 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   // --- UI State ---
   const hasMounted = React.useRef(false);
-  const { colorScheme, isDarkColorScheme } = useColorScheme();
+  const { isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+  const [migrationCompleted, setMigrationCompleted] = React.useState(false);
 
   // --- Database Migrations ---
   const { success, error } = useMigrations(db, migrations);
@@ -70,7 +69,11 @@ export default function RootLayout() {
     );
   }
 
-  console.log('Migration success:', success);
+  React.useEffect(() => {
+    if (success && !migrationCompleted) {
+      setMigrationCompleted(true);
+    }
+  }, [success, migrationCompleted]);
 
   // --- Font Loading ---
   const [loaded, FontError] = useFonts({
@@ -100,7 +103,7 @@ export default function RootLayout() {
   // --- Splash Screen Management & App Initialization ---
   useEffect(() => {
     const initializeApp = async () => {
-      if (success && loaded) {
+      if (loaded && migrationCompleted) {
         // Initialize application data
         await initializationService.initialize();
 
@@ -110,22 +113,22 @@ export default function RootLayout() {
     };
 
     initializeApp();
-  }, [success, loaded]);
+  }, [loaded, migrationCompleted]);
 
   // --- Loading States ---
   if (!isColorSchemeLoaded || !loaded) {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <OnboardingProvider>
+      <RootLayoutNav />
+    </OnboardingProvider>
+  );
 }
 
 function RootLayoutNav() {
   const { colorScheme, isDarkColorScheme } = useColorScheme();
-
-  // --- Database Queries ---
-  const { data } = useLiveQuery(db.select().from(schema.workouts));
-  console.log('Data:', data);
 
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
@@ -144,7 +147,6 @@ function RootLayoutNav() {
         >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
-        <OnboardingContainer />
       </TransitionProvider>
       <PortalHost />
     </ThemeProvider>

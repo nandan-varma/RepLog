@@ -1,10 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { View, ActivityIndicator } from "react-native";
-import { DevSettings } from 'react-native';
 import { Search } from "lucide-react-native";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { Button } from "@/components/ui/button";
 import { exerciseService, type Exercise, type ExerciseCategory, type ExerciseFilters } from "@/services/exerciseService";
 import { ExerciseList } from "@/components/excercise/ExerciseList";
 import { FilterSection } from "@/components/FilterSection";
@@ -12,7 +10,7 @@ import { FilterSection } from "@/components/FilterSection";
 
 import { useOnboarding } from '@/hooks/useOnboarding';
 
-export function Home() {
+export default function Home() {
 
 
 
@@ -119,8 +117,6 @@ export function Home() {
                         onFiltersChange={setFilters}
                         activeFilterCount={activeFilterCount}
                     />
-                    <Button onPress={async () => { try { await DevMenu.showAsync(); } catch (e) { console.log('DevMenu error:', e); } }} variant="default" size="lg" className="mt-4 bg-red-500">Open Dev Menu</Button>
-                    <Button onPress={() => DevSettings.reload()} variant="outline" size="lg" className="mt-2">Reload App</Button>
                 </View>
             </View>
             {isLoading ? (

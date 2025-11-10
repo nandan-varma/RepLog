@@ -9,7 +9,7 @@ import { useTransitionContext } from "@/components/TransitionContext";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 export default function ExercisePage() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);
   const { selectedExercise } = useTransitionContext();

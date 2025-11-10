@@ -9,7 +9,7 @@ import { BookmarkedExercises } from "@/components/excercise/BookmarkedExercises"
 import { WorkoutHistory } from "@/components/workout/WorkoutHistory"
 import { FitnessGoalDisplay } from "@/components/FitnessGoalDisplay"
 
-export function Dashboard() {
+export default function Dashboard() {
     const [tab, setTab] = useState("bookmarks");
 
     return (
@@ -38,5 +38,3 @@ export function Dashboard() {
         </View>
     )
 }
-
-export default Dashboard
