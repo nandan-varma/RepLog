@@ -32,7 +32,15 @@ export function Home() {
         async function loadExercises() {
             setIsLoading(true);
             try {
-                const data = await exerciseService.getAll();
+                let data = await exerciseService.getAll();
+                
+                // If no exercises found, initialize the database
+                if (data.length === 0) {
+                    console.log("No exercises found, initializing database...");
+                    await exerciseService.initializeDatabase();
+                    data = await exerciseService.getAll();
+                }
+                
                 setExercises(data);
             } catch (error) {
                 console.error("Failed to load exercises:", error);

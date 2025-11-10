@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useRouter } from 'expo-router';
 import { usePreferences } from '@/services/preferencesService';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { OnboardingLayout } from '@/components/onboarding/OnboardingLayout';
@@ -12,6 +13,7 @@ import { SuccessStep } from '@/components/onboarding/steps/SuccessStep';
 import type { FitnessGoalId } from '@/services';
 
 export default function OnboardingScreen() {
+  const router = useRouter();
   const {
     name, setName,
     age, setAge,
@@ -76,8 +78,11 @@ export default function OnboardingScreen() {
       await setFitnessGoal(userData.fitnessGoal as FitnessGoalId);
     }
 
-    // Finish onboarding
+    // Finish onboarding - this will trigger navigation
     await finishOnboarding();
+    
+    // Navigate to main app
+    router.replace('/(tabs)');
   };
 
   const handleBack = () => {

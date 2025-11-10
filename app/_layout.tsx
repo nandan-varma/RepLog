@@ -145,9 +145,9 @@ function RootLayoutNav() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
         <OnboardingContainer />
-        {/* Development tools - only visible in development */}
-        {__DEV__ && <DevelopmentTools />}
       </TransitionProvider>
+      {/* Development tools - rendered outside TransitionProvider to ensure visibility */}
+      {__DEV__ && <DevelopmentTools />}
       <PortalHost />
     </ThemeProvider>
   );
