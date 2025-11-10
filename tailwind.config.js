@@ -45,6 +45,9 @@ module.exports = {
       borderWidth: {
         hairline: hairlineWidth(),
       },
+      borderRadius: {
+        DEFAULT: 'var(--radius)',
+      },
       keyframes: {
         'accordion-down': {
           from: { height: '0' },

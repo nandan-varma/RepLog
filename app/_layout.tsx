@@ -13,7 +13,7 @@ import "@/assets/styles/global.css";
 import { View } from 'react-native';
 import { PortalHost } from '@rn-primitives/portal';
 import { Text } from '@/components/ui/text';
-import { DevelopmentTools } from '@/components/DevelopmentTools';
+
 import { TransitionProvider } from '@/components/TransitionContext';
 import { OnboardingContainer } from '@/components/OnboardingContainer';
 
@@ -28,7 +28,7 @@ import { initializationService } from '@/services/initializationService';
 
 // --- Theming and Styling ---
 import { Theme, ThemeProvider, DefaultTheme, DarkTheme } from '@react-navigation/native';
-import { NAV_THEME } from '~/lib/constants';
+import { NAV_THEME } from '~/lib/theme';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { FontAwesome } from '@expo/vector-icons';
 
@@ -146,8 +146,6 @@ function RootLayoutNav() {
         </Stack>
         <OnboardingContainer />
       </TransitionProvider>
-      {/* Development tools - rendered outside TransitionProvider to ensure visibility */}
-      {__DEV__ && <DevelopmentTools />}
       <PortalHost />
     </ThemeProvider>
   );

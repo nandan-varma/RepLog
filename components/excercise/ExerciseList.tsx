@@ -6,10 +6,7 @@ import { exerciseService, type Exercise, type ExerciseCategory } from "@/service
 import { BookmarkButton } from "@/components/BookmarkButton";
 import { useRouter } from "expo-router";
 import { useTransitionContext } from "../TransitionContext";
-import Animated, { 
-  SlideInLeft, 
-  FadeIn 
-} from 'react-native-reanimated';
+
 
 interface ExerciseListProps {
   exercises: Exercise[];
@@ -31,9 +28,7 @@ export function ExerciseList({ exercises, searchQuery, category }: ExerciseListP
     })
   };
   const renderExercise = ({ item, index }: { item: Exercise; index: number }) => (
-    <Animated.View
-      entering={SlideInLeft.delay(index * 50).springify().damping(15)}
-    >
+    <View>
       <TouchableOpacity 
         className="flex-row items-center p-3 bg-card rounded-lg mb-2 border border-border"
         onPress={() => handleExercisePress(item)}
@@ -53,15 +48,14 @@ export function ExerciseList({ exercises, searchQuery, category }: ExerciseListP
           size="sm" 
         />
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
   const EmptyListComponent = () => (
-    <Animated.View 
+    <View
       className="py-8 items-center"
-      entering={FadeIn.delay(200).duration(400)}
     >
       <Text className="text-muted-foreground">No exercises found</Text>
-    </Animated.View>
+    </View>
   );
 
   // Generate a unique key for each exercise using both id and name

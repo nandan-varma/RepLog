@@ -1,15 +1,21 @@
 import { useState, useEffect, useMemo } from "react";
 import { View, ActivityIndicator } from "react-native";
+import { DevSettings } from 'react-native';
 import { Search } from "lucide-react-native";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
 import { exerciseService, type Exercise, type ExerciseCategory, type ExerciseFilters } from "@/services/exerciseService";
 import { ExerciseList } from "@/components/excercise/ExerciseList";
 import { FilterSection } from "@/components/FilterSection";
-import Animated, { FadeIn } from 'react-native-reanimated';
+
+
 import { useOnboarding } from '@/hooks/useOnboarding';
 
 export function Home() {
+
+
+
     const [searchQuery, setSearchQuery] = useState("");
     const [exercises, setExercises] = useState<Exercise[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -113,15 +119,17 @@ export function Home() {
                         onFiltersChange={setFilters}
                         activeFilterCount={activeFilterCount}
                     />
+                    <Button onPress={async () => { try { await DevMenu.showAsync(); } catch (e) { console.log('DevMenu error:', e); } }} variant="default" size="lg" className="mt-4 bg-red-500">Open Dev Menu</Button>
+                    <Button onPress={() => DevSettings.reload()} variant="outline" size="lg" className="mt-2">Reload App</Button>
                 </View>
-            </View>            {isLoading ? (
-                <Animated.View
+            </View>
+            {isLoading ? (
+                <View
                     className="mt-4 flex items-center justify-center py-8"
-                    entering={FadeIn.duration(400)}
                 >
                     <ActivityIndicator size="small" className="mb-2" />
                     <Text>Loading exercises...</Text>
-                </Animated.View>
+                </View>
             ) : (
                 <ExerciseList
                     exercises={filteredExercises}
@@ -129,20 +137,7 @@ export function Home() {
                     category={filters.category || 'all'}
                 />
             )}
-        </View>
-    )
-}
 
-export default function IndexPage() {
-    const { showMainContent } = useOnboarding();
-    
-    // Render home screen with a nice fade-in animation once onboarding is completed
-    return (
-        <Animated.View 
-            className="flex-1"
-            entering={FadeIn.delay(100).duration(500)}
-        >
-            <Home />
-        </Animated.View>
+        </View>
     );
 }

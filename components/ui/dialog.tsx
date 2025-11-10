@@ -1,8 +1,8 @@
 import * as DialogPrimitive from '@rn-primitives/dialog';
 import * as React from 'react';
 import { Platform, StyleSheet, View, type ViewProps } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { X } from '~/lib/icons/X';
+
+import { X } from 'lucide-react-native';
 import { cn } from '~/lib/utils';
 
 const Dialog = DialogPrimitive.Root;
@@ -43,9 +43,9 @@ const DialogOverlayNative = React.forwardRef<
       {...props}
       ref={ref}
     >
-      <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(150)}>
+      <View>
         <>{children}</>
-      </Animated.View>
+      </View>
     </DialogPrimitive.Overlay>
   );
 });

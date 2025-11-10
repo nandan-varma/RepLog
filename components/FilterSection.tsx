@@ -5,18 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ScrollArea";
-import Animated, {
-    FadeIn,
-    FadeOut,
-    SlideInDown,
-    SlideInLeft,
-    SlideOutLeft,
-    SlideOutRight,
-    SlideOutUp,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming
-} from 'react-native-reanimated';
+
 import {
     Select,
     SelectContent,
@@ -115,10 +104,8 @@ export function FilterSection({ filters, onFiltersChange, activeFilterCount = 0 
             </Button>
 
             {isExpanded ? (
-                <Animated.View
+                <View
                     className="mt-2 bg-card rounded-md border border-border p-4 space-y-4"
-                    entering={SlideInLeft.springify().damping(15)}
-                    exiting={SlideOutRight.springify().damping(15)}
                 >
                     <Text className="font-semibold text-lg">Filter Options</Text>
                     <ScrollArea className="h-80">
@@ -216,7 +203,7 @@ export function FilterSection({ filters, onFiltersChange, activeFilterCount = 0 
                             </View>
                         </View>
                     </ScrollArea>
-                </Animated.View>
+                </View>
             ) : null}
         </View>
     );
