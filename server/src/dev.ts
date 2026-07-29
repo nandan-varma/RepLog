@@ -6,7 +6,7 @@ try {
   // no .env.local present - env vars must come from the environment instead
 }
 
-const { app } = await import('./app');
+const { app } = await import('./app.js');
 
 const port = Number(process.env.PORT ?? 3000);
 

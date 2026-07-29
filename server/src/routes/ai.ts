@@ -8,7 +8,7 @@ import {
   tipRequestSchema,
 } from 'replog-shared';
 
-import { largeModel, smallModel } from '../models';
+import { largeModel, smallModel } from '../models.js';
 
 export const ai = new Hono();
 

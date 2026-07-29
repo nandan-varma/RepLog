@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 
-import { homePage, privacyPage } from './pages';
-import { ai } from './routes/ai';
+import { homePage, privacyPage } from './pages.js';
+import { ai } from './routes/ai.js';
 
 export const app = new Hono();
 
