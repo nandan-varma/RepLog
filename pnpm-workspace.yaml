@@ -4,3 +4,9 @@ packages:
   - "packages/*"
 
 nodeLinker: hoisted
+
+onlyBuiltDependencies:
+  - esbuild
+  - unrs-resolver
+  - "@parcel/watcher"
+  - sharp

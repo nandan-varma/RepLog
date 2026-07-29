@@ -8,11 +8,14 @@
     "scheme": "replog",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "me.nandanvarma.replog",
-      "supportsTablet": false
+      "bundleIdentifier": "com.nandanvarma.replog",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
-      "package": "me.nandanvarma.replog",
+      "package": "com.nandanvarma.replog",
       "adaptiveIcon": {
         "backgroundColor": "#000000",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -39,6 +42,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "31e38caf-a15d-4acb-8e12-86dcc4c8c1ec"
+      }
+    },
+    "owner": "nandanvarma"
   }
 }
