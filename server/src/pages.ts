@@ -46,7 +46,7 @@ export const homePage = () =>
 
 export const privacyPage = () =>
   layout(
-    'Privacy Policy — RepLog',
+    'Privacy Policy - RepLog',
     `
     <h1>Privacy Policy</h1>
     <p>RepLog does not require an account and does not store your workout data on any server. All workouts, sets, and history live only on your device.</p>
