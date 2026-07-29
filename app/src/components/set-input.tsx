@@ -38,6 +38,8 @@ export function SetInput({
         placeholderTextColor={theme.muted}
         keyboardType="decimal-pad"
         style={[styles.input, { borderColor: theme.border, color: theme.text }]}
+        selectionColor={theme.text}
+        cursorColor={theme.text}
       />
       <ThemedText type="small">×</ThemedText>
       <TextInput
@@ -47,6 +49,8 @@ export function SetInput({
         placeholderTextColor={theme.muted}
         keyboardType="number-pad"
         style={[styles.input, { borderColor: theme.border, color: theme.text }]}
+        selectionColor={theme.text}
+        cursorColor={theme.text}
       />
       <View style={styles.button}>
         <Button title="Add Set" onPress={handleAdd} disabled={!canAdd} />

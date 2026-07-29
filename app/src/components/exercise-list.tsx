@@ -25,6 +25,8 @@ export function ExerciseList({ onSelect }: { onSelect: (exercise: Exercise) => v
         placeholder="Search exercises"
         placeholderTextColor={theme.muted}
         style={[styles.input, { borderColor: theme.border, color: theme.text }]}
+        selectionColor={theme.text}
+        cursorColor={theme.text}
         autoCorrect={false}
       />
       <FlatList
