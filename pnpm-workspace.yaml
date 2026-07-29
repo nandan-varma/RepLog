@@ -5,8 +5,8 @@ packages:
 
 nodeLinker: hoisted
 
-onlyBuiltDependencies:
-  - esbuild
-  - unrs-resolver
-  - "@parcel/watcher"
-  - sharp
+# pnpm ignores dependency lifecycle scripts by default unless allowlisted.
+# onlyBuiltDependencies alone did not take effect in Vercel's build container
+# (reproduced locally too, outside this machine's personal global pnpm config) -
+# this is the same escape hatch already used machine-wide for local dev.
+dangerouslyAllowAllBuilds: true
