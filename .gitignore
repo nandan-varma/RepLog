@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+.expo/
+dist/
+*.log
+.env
+.env.local
+.vercel/
+ios/
+android/
+expo-env.d.ts
