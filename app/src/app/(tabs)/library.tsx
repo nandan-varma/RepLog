@@ -1,14 +1,14 @@
 import { StyleSheet } from 'react-native';
-import { EXERCISE_CATEGORIES } from 'replog-shared';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { exercises } from '@/data/exercises';
 
 export default function LibraryScreen() {
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="subtitle">Library</ThemedText>
-      <ThemedText type="small">{EXERCISE_CATEGORIES.length} categories</ThemedText>
+      <ThemedText type="small">{exercises.length} exercises</ThemedText>
     </ThemedView>
   );
 }
