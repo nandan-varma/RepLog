@@ -23,6 +23,41 @@ export const EXERCISE_CATEGORIES: ExerciseCategory[] = [
 
 export const EXERCISE_LEVELS: ExerciseLevel[] = ['beginner', 'intermediate', 'expert'];
 
+export const EQUIPMENT_OPTIONS = [
+  'bands',
+  'barbell',
+  'body only',
+  'cable',
+  'dumbbell',
+  'e-z curl bar',
+  'exercise ball',
+  'foam roll',
+  'kettlebells',
+  'machine',
+  'medicine ball',
+  'other',
+];
+
+export const MUSCLE_OPTIONS = [
+  'abdominals',
+  'abductors',
+  'adductors',
+  'biceps',
+  'calves',
+  'chest',
+  'forearms',
+  'glutes',
+  'hamstrings',
+  'lats',
+  'lower back',
+  'middle back',
+  'neck',
+  'quadriceps',
+  'shoulders',
+  'traps',
+  'triceps',
+];
+
 export interface Exercise {
   id: string;
   name: string;

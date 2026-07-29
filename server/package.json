@@ -8,8 +8,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.21",
+    "ai": "^7.0.38",
     "hono": "^4.12.0",
-    "replog-shared": "workspace:*"
+    "replog-shared": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@hono/node-server": "^1.13.0",

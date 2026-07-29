@@ -1,18 +1,22 @@
 import { Image } from 'expo-image';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { addExerciseToWorkout, getActiveWorkoutId, startWorkout } from '@/db';
 import { exercisesById, imageUrl } from '@/data/exercises';
+import { aiTip } from '@/lib/api';
 import { useTheme } from '@/hooks/use-theme';
 
 export default function ExerciseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const exercise = exercisesById[id];
   const theme = useTheme();
+  const [tip, setTip] = useState<string | null>(null);
+  const [tipLoading, setTipLoading] = useState<'form' | 'substitute' | null>(null);
 
   if (!exercise) {
     return (
@@ -27,6 +31,19 @@ export default function ExerciseDetailScreen() {
     if (workoutId === null) workoutId = await startWorkout();
     await addExerciseToWorkout(workoutId, exercise.id);
     router.push(`/workout/${workoutId}`);
+  }
+
+  async function handleAskTip(kind: 'form' | 'substitute') {
+    setTipLoading(kind);
+    setTip(null);
+    try {
+      const result = await aiTip(exercise.name, kind);
+      setTip(result.text);
+    } catch {
+      setTip("Couldn't reach AI right now.");
+    } finally {
+      setTipLoading(null);
+    }
   }
 
   return (
@@ -54,6 +71,39 @@ export default function ExerciseDetailScreen() {
             <ThemedText type="small">{exercise.secondaryMuscles.join(', ')}</ThemedText>
           </View>
         )}
+
+        <View style={styles.section}>
+          <ThemedText type="smallBold">Ask AI</ThemedText>
+          <View style={styles.tipRow}>
+            <TouchableOpacity
+              onPress={() => handleAskTip('form')}
+              disabled={tipLoading !== null}
+              style={[styles.tipButton, { borderColor: theme.border }]}
+            >
+              {tipLoading === 'form' ? (
+                <ActivityIndicator color={theme.text} />
+              ) : (
+                <ThemedText type="small">Explain form</ThemedText>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleAskTip('substitute')}
+              disabled={tipLoading !== null}
+              style={[styles.tipButton, { borderColor: theme.border }]}
+            >
+              {tipLoading === 'substitute' ? (
+                <ActivityIndicator color={theme.text} />
+              ) : (
+                <ThemedText type="small">Suggest substitute</ThemedText>
+              )}
+            </TouchableOpacity>
+          </View>
+          {tip && (
+            <ThemedText type="small" style={styles.tipText}>
+              {tip}
+            </ThemedText>
+          )}
+        </View>
 
         <View style={styles.section}>
           <ThemedText type="smallBold">Instructions</ThemedText>
@@ -92,6 +142,20 @@ const styles = StyleSheet.create({
   section: {
     marginTop: 16,
     gap: 4,
+  },
+  tipRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+  },
+  tipButton: {
+    flex: 1,
+    borderWidth: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  tipText: {
+    marginTop: 8,
   },
   step: {
     marginTop: 6,

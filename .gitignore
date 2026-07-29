@@ -4,6 +4,7 @@ node_modules/
 dist/
 *.log
 .env
+!app/.env
 .env.local
 .vercel/
 ios/

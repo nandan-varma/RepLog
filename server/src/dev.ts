@@ -1,6 +1,12 @@
 import { serve } from '@hono/node-server';
 
-import { app } from './app';
+try {
+  process.loadEnvFile('.env.local');
+} catch {
+  // no .env.local present - env vars must come from the environment instead
+}
+
+const { app } = await import('./app');
 
 const port = Number(process.env.PORT ?? 3000);
 
