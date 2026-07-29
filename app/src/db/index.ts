@@ -86,6 +86,11 @@ export async function addExerciseToWorkout(workoutId: number, exerciseId: string
   return result.lastInsertRowId;
 }
 
+export async function removeExerciseFromWorkout(workoutExerciseId: number): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM workout_exercises WHERE id = ?', workoutExerciseId);
+}
+
 export async function addSet(
   workoutExerciseId: number,
   set: { weight: number; reps: number; unit?: string },

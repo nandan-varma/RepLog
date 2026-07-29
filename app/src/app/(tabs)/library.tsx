@@ -1,14 +1,17 @@
+import { router } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
+import { ExerciseList } from '@/components/exercise-list';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { exercises } from '@/data/exercises';
 
 export default function LibraryScreen() {
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="subtitle">Library</ThemedText>
-      <ThemedText type="small">{exercises.length} exercises</ThemedText>
+      <ThemedText type="title" style={styles.title}>
+        Library
+      </ThemedText>
+      <ExerciseList onSelect={(exercise) => router.push(`/exercise/${exercise.id}`)} />
     </ThemedView>
   );
 }
@@ -16,8 +19,12 @@ export default function LibraryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
+    paddingTop: 60,
+  },
+  title: {
+    fontSize: 28,
+    lineHeight: 34,
+    paddingHorizontal: 16,
+    marginBottom: 4,
   },
 });
