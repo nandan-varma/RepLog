@@ -12,10 +12,21 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "ios": {
+        "credentialsSource": "local"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleTeamId": "72CW7UW6RB",
+        "ascAppId": "6795766755",
+        "ascApiKeyPath": "/Users/nandan/.appstoreconnect/private_keys/AuthKey_YBMFD8G6Z5.p8",
+        "ascApiKeyId": "YBMFD8G6Z5",
+        "ascApiKeyIssuerId": "11e6aed2-036d-4d97-951f-5e0ba0fa8e15"
+      }
+    }
   }
 }

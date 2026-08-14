@@ -81,7 +81,11 @@ export default function CoachScreen() {
             cursorColor={theme.text}
             onSubmitEditing={handleSend}
           />
-          <TouchableOpacity onPress={handleSend} disabled={loading || !input.trim()}>
+          <TouchableOpacity
+            onPress={handleSend}
+            disabled={loading || !input.trim()}
+            style={{ opacity: input.trim() ? 1 : 0.4 }}
+          >
             <ThemedText type="smallBold">Send</ThemedText>
           </TouchableOpacity>
         </View>

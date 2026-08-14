@@ -10,7 +10,7 @@ import { SetRow } from '@/components/set-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { exercisesById } from '@/data/exercises';
-import { addSet, DEFAULT_UNIT, endWorkout, getWorkout, removeExerciseFromWorkout } from '@/db';
+import { addSet, DEFAULT_UNIT, deleteSet, endWorkout, getWorkout, removeExerciseFromWorkout } from '@/db';
 import type { WorkoutDetail } from '@/db/types';
 import { aiSummary } from '@/lib/api';
 import { useTheme } from '@/hooks/use-theme';
@@ -62,6 +62,11 @@ export default function WorkoutScreen() {
     await load();
   }
 
+  async function handleDeleteSet(setId: number) {
+    await deleteSet(setId);
+    await load();
+  }
+
   async function handleFinish() {
     await endWorkout(workoutId);
     const finished = await getWorkout(workoutId);
@@ -106,7 +111,12 @@ export default function WorkoutScreen() {
                 )}
               </View>
               {we.sets.map((set, i) => (
-                <SetRow key={set.id} set={set} index={i} />
+                <SetRow
+                  key={set.id}
+                  set={set}
+                  index={i}
+                  onDelete={isActive ? () => handleDeleteSet(set.id) : undefined}
+                />
               ))}
               {isActive && (
                 <>

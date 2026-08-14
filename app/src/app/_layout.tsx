@@ -41,6 +41,7 @@ export default function RootLayout() {
           headerShadowVisible: false,
           headerTintColor: theme.text,
           headerStyle: { backgroundColor: theme.background },
+          headerBackButtonDisplayMode: 'minimal',
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
