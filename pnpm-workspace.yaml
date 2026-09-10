@@ -15,16 +15,24 @@ dangerouslyAllowAllBuilds: true
 # vercel/expo/eslint (SECURITY.md §6). Remove once upstream releases patched pins.
 # Scoped keys match the resolved version line so no consumer jumps a major version.
 overrides:
-  tar: '>=7.5.21'
-  'minimatch@10': '>=10.2.3'
-  'minimatch@3>brace-expansion': '1.1.18'
-  'minimatch@10>brace-expansion': '>=5.0.9'
-  js-yaml: '>=4.3.1 <5.0.0'
-  'path-to-regexp@8': '>=8.4.0'
-  smol-toml: '>=1.6.1'
-  '@tootallnate/once@2': '>=2.0.1'
-  'nanoid@3': '>=3.3.18'
-  uuid: '11.1.1'
-  'undici@5': '6.28.0'
-  'undici@6': '6.28.0'
-  'undici@7': '7.29.0'
+  tar: ">=7.5.21"
+  "minimatch@10": ">=10.2.3"
+  "minimatch@3>brace-expansion": "1.1.18"
+  "minimatch@10>brace-expansion": ">=5.0.9"
+  js-yaml: ">=4.3.1 <5.0.0"
+  "path-to-regexp@8": ">=8.4.0"
+  "path-to-regexp@6": ">=6.3.0"
+  smol-toml: ">=1.6.1"
+  "@tootallnate/once@2": ">=2.0.1"
+  "nanoid@3": ">=3.3.18"
+  uuid: "11.1.1"
+  "undici@5": "6.28.0"
+  "undici@6": "6.28.0"
+  "undici@7": "7.29.0"
+  "ajv@8": ">=8.18.0"
+  decode-uri-component: ">=0.5.0"
+
+# image-size <=2.0.2 (GHSA-5p2g-fcmc-qvqq, ICNS/JXL/HEIF DoS) has no patched
+# release yet. Pulled in transitively by metro (react-native/expo dev tooling
+# only, not shipped in the app bundle). No override possible until upstream
+# ships a fix.

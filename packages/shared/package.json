@@ -10,9 +10,9 @@
     "postinstall": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "zod": "^4.0.0"
+    "zod": "^4.6.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.0"
+    "typescript": "^6.0.3"
   }
 }

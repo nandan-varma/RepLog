@@ -7,14 +7,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^4.0.21",
-    "ai": "^7.0.38",
+    "@ai-sdk/openai": "^4.0.64",
+    "ai": "^7.0.96",
     "replog-shared": "workspace:*",
-    "zod": "^4.4.3"
+    "zod": "^4.6.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.7.0",
-    "vercel": "^56.0.0"
+    "@types/node": "^22.20.2",
+    "typescript": "^6.0.3",
+    "vercel": "^59.14.0"
   }
 }
