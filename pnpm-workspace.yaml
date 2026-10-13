@@ -17,7 +17,7 @@ dangerouslyAllowAllBuilds: true
 overrides:
   tar: ">=7.5.21"
   "minimatch@10": ">=10.2.3"
-  "minimatch@3>brace-expansion": "1.1.18"
+  "minimatch@3>brace-expansion": ">=1.1.21 <2.0.0"
   "minimatch@10>brace-expansion": ">=5.0.9"
   js-yaml: ">=4.3.1 <5.0.0"
   "path-to-regexp@8": ">=8.4.0"
@@ -25,9 +25,41 @@ overrides:
   smol-toml: ">=1.6.1"
   "@tootallnate/once@2": ">=2.0.1"
   "nanoid@3": ">=3.3.18"
-  uuid: "11.1.1"
-  "undici@5": "6.28.0"
-  "undici@6": "6.28.0"
-  "undici@7": "7.29.0"
+  uuid: ">=11.1.1 <12.0.0"
+  "undici@5": ">=6.28.1 <7.0.0"
+  "undici@6": ">=6.28.1 <7.0.0"
+  "undici@7": ">=7.29.1 <8.0.0"
   "ajv@8": ">=8.18.0"
   decode-uri-component: ">=0.5.0"
+
+minimumReleaseAgeExclude:
+  - '@vercel/backends@19.0.0'
+  - '@vercel/build-utils@14.21.0'
+  - '@vercel/cervel@0.1.80'
+  - '@vercel/container@19.1.0'
+  - '@vercel/detect-agent@1.2.7'
+  - '@vercel/elysia@19.0.0'
+  - '@vercel/express@19.0.0'
+  - '@vercel/fastify@19.0.0'
+  - '@vercel/gatsby-plugin-vercel-builder@2.2.72'
+  - '@vercel/go@22.0.0'
+  - '@vercel/h3@19.0.0'
+  - '@vercel/hono@19.0.0'
+  - '@vercel/hydrogen@20.0.0'
+  - '@vercel/koa@19.0.0'
+  - '@vercel/nestjs@19.0.0'
+  - '@vercel/next@23.0.0'
+  - '@vercel/node@24.0.0'
+  - '@vercel/python@25.0.0'
+  - '@vercel/redwood@21.0.0'
+  - '@vercel/remix-builder@24.0.0'
+  - '@vercel/ruby@21.0.0'
+  - '@vercel/rust@20.0.0'
+  - '@vercel/static-build@21.0.0'
+  - '@vercel/vc-native-darwin-arm64@64.0.2'
+  - '@vercel/vc-native-darwin-x64@64.0.2'
+  - '@vercel/vc-native-linux-arm64@64.0.2'
+  - '@vercel/vc-native-linux-x64@64.0.2'
+  - '@vercel/vc-native-win32-arm64@64.0.2'
+  - '@vercel/vc-native-win32-x64@64.0.2'
+  - vercel@64.0.2
