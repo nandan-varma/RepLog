@@ -16,7 +16,7 @@ dangerouslyAllowAllBuilds: true
 # Scoped keys match the resolved version line so no consumer jumps a major version.
 overrides:
   tar: ">=7.5.21"
-  "minimatch@10": ">=10.2.3"
+  "minimatch@10": ">=11.0.3 <12.0.0"
   "minimatch@3>brace-expansion": ">=1.1.21 <2.0.0"
   "minimatch@10>brace-expansion": ">=5.0.9"
   js-yaml: ">=4.3.1 <5.0.0"
@@ -27,10 +27,14 @@ overrides:
   "nanoid@3": ">=3.3.18"
   uuid: ">=11.1.1 <12.0.0"
   "undici@5": ">=6.28.1 <7.0.0"
-  "undici@6": ">=6.28.1 <7.0.0"
-  "undici@7": ">=7.29.1 <8.0.0"
+  "undici@6": ">=6.29.1 <7.0.0"
+  "undici@7": ">=7.30.1 <8.0.0"
   "ajv@8": ">=8.18.0"
-  decode-uri-component: ">=0.5.0"
+  decode-uri-component: ">=0.5.1"
+  fast-uri: ">=3.1.9 <4.0.0"
+  node-forge: ">=1.4.1"
+  "glob@13": ">=14.0.2 <15.0.0"
+  "zod@4": ">=4.6.7"
 
 minimumReleaseAgeExclude:
   - '@vercel/backends@19.0.0'
