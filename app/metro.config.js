@@ -13,5 +13,7 @@ config.resolver.nodeModulesPaths = [
 ];
 config.resolver.disableHierarchicalLookup = true;
 config.resolver.unstable_enableSymlinks = true;
+// expo-sqlite's web build loads its SQLite WebAssembly file as an asset.
+config.resolver.assetExts.push('wasm');
 
 module.exports = config;
