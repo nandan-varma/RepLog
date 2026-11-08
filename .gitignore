@@ -10,3 +10,4 @@ dist/
 ios/
 android/
 expo-env.d.ts
+app/credentials.json
